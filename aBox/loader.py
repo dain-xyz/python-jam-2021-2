@@ -1,11 +1,11 @@
 # a class which loads other "utilities" and runs them
 from rich.console import Console
 
+
 class loader:
     # class of current  utility being used
     currentUtility = None
     console = Console()
-
 
     def load(self, filename: str) -> int:
         """Loads a class utility and loads that into the run function. Return a error code (0 is ok, 1 is an error
@@ -31,4 +31,3 @@ class loader:
             code = self.tick()
             if code != 0:
                 self.load("mainMenu.py")
-
