@@ -10,20 +10,22 @@ class loader:
     console = Console()
 
     def load(self, filename: str) -> int:
-        """Loads a class utility and loads that into the run function. Return a error code (0 is ok, 1 is an error
-        occurred """
+        """Loads a class utility and loads that into the run function.
 
+        Return a error code (0 is ok, 1 is an error occurred
+        """
         try:
-            exec(f"from microUtilities.{filename} import {filename}")
-            exec(f"self.currentUtility = {filename}()")
+            self.currentUtility = getattr(__import__("microUtilities."+filename), filename)
             return 0
         except ImportError:
             return 1
 
     def tick(self) -> int:
-        """Runs the classses main function once and displays it. If the class returns 0, its fine, else the class
-        will return a 1 for exit and 2 for error. This function will pass on that info """
+        """Runs the classes main function once and displays it.
 
+        If the class returns 0, its fine, else the class will return a 1 for exit and 2 for error.
+        This function will pass on that info
+        """
         # will be a list of events e.g. keypresses etc
         events = []
 
@@ -32,9 +34,8 @@ class loader:
 
         return code
 
-    def run(self):
+    def run(self) -> None:
         """Just ticks forever and if there is a crash or exit, goes to main menu"""
-
         while True:
             code = self.tick()
             if code != 0:
