@@ -3,6 +3,8 @@ from rich.console import Console
 
 
 class loader:
+    """a class which loads other "utilities" and runs them"""
+
     # class of current  utility being used
     currentUtility = None
     console = Console()
@@ -10,6 +12,7 @@ class loader:
     def load(self, filename: str) -> int:
         """Loads a class utility and loads that into the run function. Return a error code (0 is ok, 1 is an error
         occurred """
+
         try:
             exec(f"from microUtilities.{filename} import {filename}")
             exec(f"self.currentUtility = {filename}()")
@@ -31,6 +34,7 @@ class loader:
 
     def run(self):
         """Just ticks forever and if there is a crash or exit, goes to main menu"""
+
         while True:
             code = self.tick()
             if code != 0:
