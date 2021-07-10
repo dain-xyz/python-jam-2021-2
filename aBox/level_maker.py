@@ -1,10 +1,9 @@
 from dataclasses import dataclass
 from typing import Tuple
 
-from perams import objects
-from PIL import Image  # import skimage
+from PIL import Image
 
-# from dataclasses import dataclass
+from perams import objects
 
 
 def make_list_map(img: str) -> list:
@@ -29,7 +28,7 @@ def make_list_map(img: str) -> list:
 def make_string_map(img: str) -> str:
     """Functions need docstring to pass the github tests"""
     levelimg = Image.open(img)
-    # creates a string of the map image
+    # Creates a string of the map image
     mapstring = ""
     for y in range(0, levelimg.height):
         for x in range(0, levelimg.width):
@@ -46,7 +45,7 @@ def make_string_map(img: str) -> str:
 def make_tuple_map(img: str) -> tuple:
     """Functions need docstring to pass the github tests"""
     levelimg = Image.open(img)
-    # crates tupels of the cordinets of the objects
+    # Creates tuples of the coordinates of the objects
     Point = tuple[int, int]
 
     @dataclass
@@ -55,6 +54,7 @@ def make_tuple_map(img: str) -> tuple:
         player: Point
         wall: set[Point]
         box: set[Point]
+
     initial = LevelState(
         img_dim=(levelimg.size),
         player=(),
