@@ -1,9 +1,10 @@
-from PIL import Image
 from dataclasses import dataclass
-from rich import print
-from perams import objects
 from typing import Tuple
 
+from PIL import Image
+
+from perams import objects
+from rich import print
 
 Point = tuple[int, int]
 @dataclass
@@ -25,9 +26,9 @@ def make_list_map(img) -> list:
         for x in range(0, levelimg.width):
             cordinate = (x, y)
             pixel = r, g, b = levelimg.getpixel(cordinate)
-            for curent_object in objects:
-                if(pixel[0] == curent_object['r'] and pixel[1] == curent_object['g'] and pixel[2] == curent_object['b']):
-                    map[y].insert(0, {"ob":curent_object['ob']})
+            for curr_object in objects:
+                if(pixel[0] == curr_object['r'] and pixel[1] == curr_object['g'] and pixel[2] == curr_object['b']):
+                    map[y].insert(0, {"ob": curr_object['ob']})
 
     return map
 
@@ -54,7 +55,7 @@ def make_tuple_map(img) -> LevelState:
     """
     Converts the map image into tuples of the coordinates of the objects.
     """
-    levelimg = Image.open(img) 
+    levelimg = Image.open(img)
 
     initial = LevelState(
         img_dim=(levelimg.size),
@@ -68,9 +69,9 @@ def make_tuple_map(img) -> LevelState:
             pixel = r, g, b = levelimg.getpixel(cordinate)
             for i in range(len(objects)):
                 if(pixel[0] == objects[i]['r'] and pixel[1] == objects[i]['g'] and pixel[2] == objects[i]['b']):
-                    if objects[i]['ob'] in ( "air","enemy"):
+                    if objects[i]['ob'] in ("air", "enemy"):
                         continue
-                    if objects[i]['ob'] in ( "player"):
+                    if objects[i]['ob'] in ("player"):
                         initial.player = (x, y)
                         continue
                     exec(f"initial.{objects[i]['ob']}.add({cordinate})")
@@ -82,7 +83,7 @@ def make_dictionary_map(img) -> dict:
     Converts the map image to a dictionary of all the object positions.
     """
     levelimg = Image.open(img)
-    initial = {'img_dim':levelimg.size}
+    initial = {'img_dim': levelimg.size}
     for i in objects:
         initial[i['ob']] = []
 
@@ -94,9 +95,9 @@ def make_dictionary_map(img) -> dict:
             b = levelimg.getpixel(cordinate)[2]
             for i in range(len(objects)):
                 if(r == objects[i]['r'] and g == objects[i]['g'] and b == objects[i]['b']):
-                    if objects[i]['ob'] in ( "air","enemy"):
+                    if objects[i]['ob'] in ("air", "enemy"):
                         continue
-                    if objects[i]['ob'] in ( "player"):
+                    if objects[i]['ob'] in ("player"):
                         initial['player'] = (x, y)
                         continue
                     initial[objects[i]['ob']].append(cordinate)
@@ -105,7 +106,7 @@ def make_dictionary_map(img) -> dict:
 
 if __name__ == "__main__":
     img_source = input("type image number: ")
-    print("list:\n" + str(make_list_map("levels\level" + img_source + ".png")))
-    print("string:\n" + str(str(make_string_map("levels\level" + img_source + ".png"))))
-    print("tuple:\n" + str(make_tuple_map("levels\level" + img_source + ".png")))
-    print("dictionary:\n" + str(make_dictionary_map("levels\level" + img_source + ".png")))
+    print("list:\n" + str(make_list_map("levels\\level" + img_source + ".png")))
+    print("string:\n" + str(str(make_string_map("levels\\level" + img_source + ".png"))))
+    print("tuple:\n" + str(make_tuple_map("levels\\level" + img_source + ".png")))
+    print("dictionary:\n" + str(make_dictionary_map("levels\\level" + img_source + ".png")))

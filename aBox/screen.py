@@ -1,6 +1,7 @@
+from blessed import Terminal
+
 from level_maker import make_dictionary_map
 from perams import objects
-from blessed import Terminal
 
 Point = tuple[int, int]
 term = Terminal()
@@ -8,6 +9,7 @@ term = Terminal()
 initial = {}
 for i in objects:
     initial[i['ob']] = []
+
 
 def map_print(map) -> None:
     """
@@ -31,4 +33,4 @@ def map_print(map) -> None:
 
 
 if __name__ == "__main__":
-    map_print(make_dictionary_map("levels\level" + input("type image number: ") + ".png"))
+    map_print(make_dictionary_map("levels\\level" + input("type image number: ") + ".png"))
