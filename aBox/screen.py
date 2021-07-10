@@ -1,22 +1,36 @@
-from blessed import Terminal
+from dataclasses import dataclass
+from typing import Tuple
 
+from blessed import Terminal
 from level_maker import make_tuple_map
+
+# from perams import objects
 
 Point = tuple[int, int]
 term = Terminal()
 
 
-def map_print(map: str) -> None:
-    """
-    Gets the converted image from level_maker.py and
-    prints it to the terminal using blessed.
-    """
+@dataclass
+class LevelState:
+    """Classes need docstring to pass the github tests"""
+
+    img_dim: Tuple[int, int]
+    player: Point
+    wall: set[Point]
+    box: set[Point]
+
+
+def map_print(map: str) -> str:
+    """Functions need docstring to pass the github tests"""
     Map = [[" " for i in range(map.img_dim[1])] for i in range(map.img_dim[0])]
     for i in map.wall:
         Map[i[0]][i[1]] = "█"
     for i in map.box:
         Map[i[0]][i[1]] = "■"
     Map[map.player[0]][map.player[1]] = "O"
+
+    # for line in Map:
+    #     print("".join(line))
 
     with term.hidden_cursor():
         print(term.home + term.clear)
@@ -32,7 +46,7 @@ def map_print(map: str) -> None:
         print(term.move_xy(map.player[0], map.player[1]) + term.white("O"))
 
     print(term.move_y(map.img_dim[1]))
-    return
+    return Map
 
 
 if __name__ == "__main__":
