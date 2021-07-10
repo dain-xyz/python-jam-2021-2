@@ -15,7 +15,8 @@ class loader:
         Return a error code (0 is ok, 1 is an error occurred
         """
         try:
-            self.currentUtility = getattr(__import__("microUtilities."+filename), filename)
+            module = __import__(f"microUtilities.{filename}", fromlist=[None])
+            self.currentUtility = getattr(module, filename)()
             return 0
         except ImportError:
             return 1
