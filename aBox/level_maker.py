@@ -65,21 +65,21 @@ def make_tuple_map(img):
                     exec(f"initial.{objects[i]['ob']}.add({cordinate})")
     return initial
 
-def make_dictionary_map(img):
+def make_dictionary_map(img) -> dict:
     levelimg = Image.open(img) 
     #crates tupels of the cordinets of the objects
-    initial = {}
+    initial = {'img_dim':levelimg.size}
     for i in objects:
         initial[i['ob']] = []
-
-    print(initial)
 
     for y in range(0, levelimg.height):
         for x in range(0, levelimg.width):
             cordinate = (x, y)
-            pixel = r, g, b = levelimg.getpixel(cordinate)
+            r = levelimg.getpixel(cordinate)[0]
+            g = levelimg.getpixel(cordinate)[1]
+            b = levelimg.getpixel(cordinate)[2]
             for i in range(len(objects)):
-                if(pixel[0] == objects[i]['r'] and pixel[1] == objects[i]['g'] and pixel[2] == objects[i]['b']):
+                if(r == objects[i]['r'] and g == objects[i]['g'] and b == objects[i]['b']):
                     if objects[i]['ob'] in ( "air","enemy"):
                         continue
                     if objects[i]['ob'] in ( "player"):
