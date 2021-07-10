@@ -1,23 +1,27 @@
-from typing import Tuple
 from dataclasses import dataclass
-from perams import objects
-# from rich import print
-from blessed import Terminal
+from typing import Tuple
 
+from blessed import Terminal
 from level_maker import make_tuple_map
 
-Point = tuple[int, int]
+# from perams import objects
 
+Point = tuple[int, int]
 term = Terminal()
+
 
 @dataclass
 class LevelState:
+    """Classes need docstring to pass the github tests"""
+
     img_dim: Tuple[int, int]
     player: Point
     wall: set[Point]
     box: set[Point]
 
-def map_print(map) -> str:
+
+def map_print(map: str) -> str:
+    """Functions need docstring to pass the github tests"""
     Map = [[" " for i in range(map.img_dim[1])] for i in range(map.img_dim[0])]
     for i in map.wall:
         Map[i[0]][i[1]] = "█"
@@ -43,6 +47,7 @@ def map_print(map) -> str:
 
     print(term.move_y(map.img_dim[1]))
     return Map
+
 
 if __name__ == "__main__":
     map_print(make_tuple_map("level2.png"))
