@@ -9,12 +9,11 @@ initial = {}
 for i in objects:
     initial[i['ob']] = []
 
-def map_print(image_location) -> None:
+def map_print(map) -> None:
     """
-    Gets the converted image from level_maker.py and
+    Gets the converted image passed along and
     prints it to the terminal using blessed
     """
-    map = make_dictionary_map(image_location)
     with term.hidden_cursor():
         print(term.home + term.clear)
 
@@ -32,4 +31,4 @@ def map_print(image_location) -> None:
 
 
 if __name__ == "__main__":
-    map_print(f"levels\level" + input("type image number: ") + ".png")
+    map_print(make_dictionary_map("levels\level" + input("type image number: ") + ".png"))
