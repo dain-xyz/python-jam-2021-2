@@ -1,13 +1,24 @@
-from PIL import Image #import skimage
-import typing
+from PIL import Image
 from dataclasses import dataclass
 from rich import print
 from perams import objects
 from typing import Tuple
 
-def make_list_map(img):
+
+Point = tuple[int, int]
+@dataclass
+class LevelState:
+    img_dim: Tuple[int, int]
+    player: Point
+    wall: set[Point]
+    box: set[Point]
+
+
+def make_list_map(img) -> list:
+    """
+    Converts map image to lists.
+    """
     levelimg = Image.open(img)
-    #creates a list of list of dictionaries of the map image
     map = []
     for y in range(0, levelimg.height):
         map.insert(y, [])
@@ -20,9 +31,12 @@ def make_list_map(img):
 
     return map
 
-def make_string_map(img):
+
+def make_string_map(img) -> str:
+    """
+    Converts the map image into a string.
+    """
     levelimg = Image.open(img)
-    #creates a string of the map image
     mapstring = ""
     for y in range(0, levelimg.height):
         for x in range(0, levelimg.width):
@@ -35,16 +49,13 @@ def make_string_map(img):
 
     return mapstring
 
-def make_tuple_map(img):
+
+def make_tuple_map(img) -> LevelState:
+    """
+    Converts the map image into tuples of the coordinates of the objects.
+    """
     levelimg = Image.open(img) 
-    #crates tupels of the cordinets of the objects
-    Point = tuple[int, int]
-    @dataclass
-    class LevelState:
-        img_dim: Tuple[int, int]
-        player: Point
-        wall: set[Point]
-        box: set[Point]
+
     initial = LevelState(
         img_dim=(levelimg.size),
         player=(),
@@ -65,9 +76,12 @@ def make_tuple_map(img):
                     exec(f"initial.{objects[i]['ob']}.add({cordinate})")
     return initial
 
+
 def make_dictionary_map(img) -> dict:
-    levelimg = Image.open(img) 
-    #crates tupels of the cordinets of the objects
+    """
+    Converts the map image to a dictionary of all the object positions.
+    """
+    levelimg = Image.open(img)
     initial = {'img_dim':levelimg.size}
     for i in objects:
         initial[i['ob']] = []
@@ -87,3 +101,11 @@ def make_dictionary_map(img) -> dict:
                         continue
                     initial[objects[i]['ob']].append(cordinate)
     return initial
+
+
+if __name__ == "__main__":
+    img_source = input("type image number: ")
+    print("list:\n" + str(make_list_map("levels\level" + img_source + ".png")))
+    print("string:\n" + str(str(make_string_map("levels\level" + img_source + ".png"))))
+    print("tuple:\n" + str(make_tuple_map("levels\level" + img_source + ".png")))
+    print("dictionary:\n" + str(make_dictionary_map("levels\level" + img_source + ".png")))
