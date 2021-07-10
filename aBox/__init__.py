@@ -1,4 +1,7 @@
 # Entry point
+from loader import loader
 
 if __name__ == '__main__':
-    print("Hello World")
+    main_loader = loader()
+    main_loader.load("mainMenu")
+    main_loader.run()
