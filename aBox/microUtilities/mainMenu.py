@@ -2,4 +2,6 @@
 
 class mainMenu:
     def run(self, events, width, height):
-        return "[rgb(255, 255, 255)]█[/rgb(255, 255, 255)]"*width*height, 0
+        """Just returns a white screen with some Black on the bottom"""
+        return "[rgb(255, 255, 255)]█[/rgb(255, 255, 255)]"*width*(height-10)+"[rgb(000, 000, 000)]█[/rgb(000, 000, " \
+                                                                              "000)]"*10, 0

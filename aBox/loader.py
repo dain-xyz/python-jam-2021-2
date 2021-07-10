@@ -10,9 +10,12 @@ class loader:
     def load(self, filename: str) -> int:
         """Loads a class utility and loads that into the run function. Return a error code (0 is ok, 1 is an error
         occurred """
-
-        exec(f"from microUtilities.{filename} import {filename}")
-        exec(f"self.currentUtility = {filename}()")
+        try:
+            exec(f"from microUtilities.{filename} import {filename}")
+            exec(f"self.currentUtility = {filename}()")
+            return 0
+        except ImportError:
+            return 1
 
     def tick(self) -> int:
         """Runs the classses main function once and displays it. If the class returns 0, its fine, else the class
@@ -27,6 +30,7 @@ class loader:
         return code
 
     def run(self):
+        """Just ticks forever and if there is a crash or exit, goes to main menu"""
         while True:
             code = self.tick()
             if code != 0:
