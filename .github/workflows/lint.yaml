@@ -1,3 +1,5 @@
+
+
 # GitHub Action Workflow enforcing our code style.
 
 name: Lint, Build & Deploy
@@ -51,9 +53,7 @@ jobs:
         run: |
           pip install -U poetry
           poetry install
-        env:
-          POETRY_VIRTUALENVS_CREATE: false
 
       - name: Run hooks through our environment.
         run: |
-          pre-commit run --all-files
+          poetry run pre-commit run --all-files
