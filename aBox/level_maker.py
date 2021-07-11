@@ -3,8 +3,13 @@ from typing import Tuple
 
 from PIL import Image
 
-from perams import objects
 from rich import print
+import json
+
+#loads the objects list from json file
+file = open('objects.json')
+objects = json.load(file)
+file.close
 
 Point = tuple[int, int]
 @dataclass
@@ -105,8 +110,8 @@ def make_dictionary_map(img) -> dict:
 
 
 if __name__ == "__main__":
-    img_source = input("type image number: ")
-    print("list:\n" + str(make_list_map("levels\\level" + img_source + ".png")))
-    print("string:\n" + str(str(make_string_map("levels\\level" + img_source + ".png"))))
-    print("tuple:\n" + str(make_tuple_map("levels\\level" + img_source + ".png")))
-    print("dictionary:\n" + str(make_dictionary_map("levels\\level" + img_source + ".png")))
+    img_source = "levels\\level" + input("type image number: ") + ".png"
+    print("list:\n" + str(make_list_map(img_source)))
+    print("string:\n" + str(str(make_string_map(img_source))))
+    print("tuple:\n" + str(make_tuple_map(img_source)))
+    print("dictionary:\n" + str(make_dictionary_map(img_source)))
