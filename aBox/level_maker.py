@@ -14,11 +14,19 @@ from tiles import Tile, Player, Air, Wall, Box, Enemy, Fire
 Point = namedtuple("Point", ["x", "y"])
 
 def point_add(a, b):
-    # it would be nice to define this as __add__ on a dataclass but
-    # for the moment we want to be able to just type (3, 4) for debugging
+    # todo: this stuff really needs to be a dataclass with proper __add__ method
+    # but for the moment we want to be able to just type (3, 4) for debugging
     # rather than always Point(3, 4)
 
     return Point(a[0] + b[0], a[1] + b[1])
+
+def point_sub(a, b):
+    # likewise
+    return Point(a[0] - b[0], a[1] - b[1])
+
+def point_inv(a):
+    # likewise
+    return Point(-a[0], -a[1])
 
 
 UP = Point(0, -1)
@@ -28,26 +36,39 @@ RIGHT = Point(1, 0)
 DIRECTIONS = {UP, DOWN, LEFT, RIGHT}
 
 
+@dataclass
+class TileStack:
+    contents: list[Type[Tile]]
+    
+    def push(self, x):
+        self.contents.append(x)
+    
+    def pop(self):
+        return self.contents.pop()
+    
+    @property
+    def top(self):
+        return self.contents[-1]
+    
+
+
+
 class LevelState:
     def __init__(self, tilemap: dict[Point, Type[Tile]]):
-        # mapping from x-y coordinates to tile type
-        self._point_to_tile = tilemap
+        self._tiles = {}
 
-        # mapping from tile type to set of x-y coordinates
-        index = defaultdict(set)
-        for point, tile in self._point_to_tile.items():
-            index[tile].add(point)
+        for point, raw_tile in tilemap.items():
+            if raw_tile is Air:
+                self._tiles[point] = TileStack([Air])
 
-        self._tile_to_points = dict(index)
+            elif raw_tile is Player:
+                self._player_pos = point
+                self._tiles[point] = TileStack([Air, Player])
+
+            else:
+                self._tiles[point] = TileStack([Air, raw_tile])
         
-        # there should only ever be one player
-        if len((player_tiles := self._tile_to_points[Player])) != 1:
-            raise ValueError(f"must have exactly one player tile in the map, got: {player_tiles}")
-        
-        self._tile_to_points[Player] = player_tiles.pop()
-
-        # we begin by grabbing nothing
-        self._grabbing = None
+        self._grab_pos = None
 
 
     @classmethod
@@ -70,139 +91,120 @@ class LevelState:
             Point(x, y): colormap[pixel_map[x, y]]
             for x, y in coords
         }
+
+        players = [x for x in tilemap.values() if x is Player]
+        if (n_players := len(players)) != 1:
+            raise ValueError(f"must have exactly one player tile in the map, got: {n_players}")
         
         return LevelState(tilemap)
-
+    
 
     @cached_property
     def size(self) -> Point:
-        x, y = max(self._point_to_tile.keys())
+        x, y = max(self._tiles.keys())
         return Point(x + 1, y + 1)
+
+    
+    def is_solid(self, point: Point) -> bool:
+        return self._tiles[point].top.solid
+
+    
+    def _move_unsafe(self, old: Point, new: Point) -> None:
+        thing = self._tiles[old].pop()
+        self._tiles[new].push(thing)
+
+
+    def can_move(self, old: Point, new: Point) -> bool:
+        return not self.is_solid(new)
+
+
+    def move_topmost(self, old: Point, new: Point) -> None:
+        if not self.can_move(old, new):
+            raise ValueError(f"cannot move from {old} to {new}: destination is solid: {self._tiles[new]}")
+        
+        self._move_unsafe(old, new)
     
 
     @property
     def player_pos(self) -> Point:
-        return self._tile_to_points[Player]
+        return self._player_pos
+    
+
+    @player_pos.setter
+    def player_pos(self, new: Point) -> None:
+        self.move_topmost(self.player_pos, new)
+        self._player_pos = new
 
 
     @property
-    def grabbed_box_pos(self) -> Point:
-        # defensive programming in case I screwed up somewhere
+    def grab_pos(self) -> Point:
+        if self._grab_pos is None:
+            return None
         
-        if not self._grabbing:
-            raise RuntimeError("tried to get grabbed box pos but not currently grabbing box")
+        tile = self._tiles[self._grab_pos]
+        if tile.top is not Box:
+            raise RuntimeError(f"thought tile {tile} at {self._grab_pos} had box at top, but it doesn't")
         
-        expected_box_pos = point_add(self.player_pos, self._grabbing)
-        if expected_box_pos not in self._tile_to_points[Box]:
-            raise RuntimeError(f"expected a box at {expected_box_pos} but no Box there")
-        
-        return expected_box_pos
-
-
+        return self._grab_pos
     
-    def is_solid(self, point: Point) -> bool:
-        return self._point_to_tile[point].solid
 
-    # the safe vs unsafe functions are for debugging; probably could merge them into one
-    # and just log the errors
+    @property
+    def is_grabbing(self):
+        return bool(self.grab_pos)
     
-    def unsafe_grab(self, direction: Point) -> bool:
+
+    @property
+    def grab_direction(self):
+        return point_sub(self.grab_pos, self.player_pos)
+    
+
+    def grab(self, direction: Point) -> None:
         target = point_add(self.player_pos, direction)
-        if not target in self._tile_to_points[Box]:
-            raise KeyError(f"{target} is not a Box")
+        if self._tiles[target].top is not Box:
+            return
         
-        self._grabbing = direction
-    
-
-    def grab(self, direction: Point) -> bool:
-        try:
-            self.unsafe_grab(direction)
-        except KeyError:
-            pass
-    
-
-    def unsafe_ungrab(self) -> None:
-        if self._grabbing is None:
-            raise ValueError("cannot ungrab: not grabbing anything right now")
-
-        # if we somehow lost track of the box then this will throw RuntimeError
-        self.grabbed_box_pos
-
-        self._grabbing = None
+        self._grab_pos = target
     
 
     def ungrab(self) -> None:
-        try:
-            self.unsafe_ungrab()
-        except ValueError:
-            pass
+        self._grab_pos = None
     
 
-    def movement_is_possible(self, start: Point, direction: Point) -> bool:
-        new_pos = point_add(start, direction)
-        return new_pos in self._point_to_tile and not self._point_to_tile[new_pos].solid
-
+    def move_player(self, direction):
+        box_pos = self.grab_pos
+        player_destination = point_add(self.player_pos, direction)
     
-    def unsafe_move_box(self, box_pos: Point, direction: Point) -> None:
-        if box_pos not in self._tile_to_points[Box]:
-            raise KeyError(f"{box_pos} is not a Box")
-        
-        if not self.movement_is_possible(box_pos, direction):
-            raise ValueError(f"cannot move box from {box_pos} by {direction}")
-        
-        old_pos = box_pos
-        new_pos = point_add(old_pos, direction)
-
-        # this could probably be refactored eventually but it works for now
-
-        self._point_to_tile[old_pos] = Air
-        self._tile_to_points[Air].add(old_pos)
-        self._tile_to_points[Box].remove(old_pos)
-
-        self._point_to_tile[new_pos] = Box
-        self._tile_to_points[Box].add(new_pos)
-        self._tile_to_points[Air].remove(new_pos)
-    
-
-    def move_box(self, box_pos: Point, direction: Point) -> None:
-        try:
-            self.unsafe_move_box(box_pos, direction)
-        except ValueError:
-            pass
-
-
-    def unsafe_move_player(self, direction: Point) -> None:
-        # player is not moving a box
-        if not self._grabbing:
-            if not self.movement_is_possible(self.player_pos, direction):
-                raise ValueError(f"cannot move player from {self.player_pos} by {direction}")
-            
-            old_pos = self.player_pos
-            new_pos = point_add(old_pos, direction)
-
-            self._point_to_tile[old_pos] = Air
-            self._tile_to_points[Air].add(old_pos)
-
-            self._point_to_tile[new_pos] = Player
-            self._tile_to_points[Player] = new_pos
-            self._tile_to_points[Air].remove(new_pos)
-
+        if not self.is_grabbing:
+            if self.can_move(self.player_pos, player_destination):
+                self.player_pos = player_destination
             return
         
-        # player wants to push the box
-        elif direction == self._grabbing:
-            self.unsafe_move_box(self.grabbed_box_pos, direction)
-            
+        box_destination = point_add(box_pos, direction)
 
-
-
-
-    def move_player(self, direction: Point) -> None:
-        try:
-            self.unsafe_move_player(direction)
-        except ValueError:
-            pass
-
+        # pushing
+        if player_destination == box_pos:
+            if self.can_move(box_pos, box_destination):
+                self.move_topmost(box_pos, box_destination)
+                self.player_pos = player_destination
+                self._grab_pos = box_destination
+            return
+        
+        # pulling
+        if box_destination == self.player_pos:
+            if self.can_move(self.player_pos, player_destination):
+                self.player_pos = player_destination
+                self.move_topmost(box_pos, box_destination)
+                self._grab_pos = box_destination
+            return
+        
+        # sideways
+        player_can_move = self.can_move(self.player_pos, player_destination)
+        box_can_move = self.can_move(box_pos, box_destination)
+        
+        if player_can_move and box_can_move:
+            self.player_pos = player_destination
+            self.move_topmost(box_pos, box_destination)
+            self._grab_pos = box_destination
 
 
     def __str__(self) -> str:
@@ -213,17 +215,9 @@ class LevelState:
             for y in range(self.size.y)
         ]
 
-        for (x, y), tile in self._point_to_tile.items():
-            array[y][x] = tile.symbol
+        for (x, y), tile in self._tiles.items():
+            array[y][x] = tile.top.symbol
         
         lines = ["".join(line) for line in array]
         return "\n".join(lines)
 
-
-if __name__ == "__main__":
-    level_number = input("type image number: ")
-    filename = f"level{level_number}.png"
-    img_source = Path("levels") / filename
-
-    state = LevelState.from_image(img_source)
-    print(state)
