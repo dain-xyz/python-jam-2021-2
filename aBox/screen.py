@@ -37,5 +37,16 @@ def map_print(map) -> None:
     return
 
 
+def level_print(level) -> None:
+    with term.hidden_cursor():
+        print(term.home + term.clear)
+
+        for (x, y), tile in level._point_to_tile.items():
+            foo = term.move_xy(x, y) + term.white(tile.symbol)
+            print(foo)
+        
+        print(term.move_y(level.size.y))
+
+
 if __name__ == "__main__":
     map_print(make_dictionary_map("levels\\level" + input("type image number: ") + ".png"))
