@@ -3,9 +3,10 @@ from blessed import Terminal
 term = Terminal()
 
 
-def create_box():
+def create_box() -> None:
+    """Creates a text-input-box"""
     print(term.home + term.clear)
-    with term.hidden_cursor() and term.cbreak():
+    with term.fullscreen(), term.hidden_cursor(), term.cbreak():
 
         # Makes it so you can type and make new lines in the terminal.
         key = ""
@@ -31,6 +32,7 @@ def create_box():
                 print(term.move_xy(0, y) + " "*(term.width-2))
 
             print(term.move_xy(1, 1) + display_string + term.blink("⎸"))
+
 
 if __name__ == "__main__":
     create_box()
