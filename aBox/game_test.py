@@ -1,8 +1,10 @@
 from level_maker import make_dictionary_map
 from screen import map_print
+from pathlib import Path
 import time
 
-map = make_dictionary_map('levels\\level1.png')
+level_path = Path("levels/level1.png")
+map = make_dictionary_map(level_path)
 
 speed = 0.1
 moves = ['r', 'r', 'r', 'r', 'r', 'r', 'u', 'u', 'u', 'u', 'u', 'u', 'u']
