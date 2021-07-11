@@ -1,7 +1,12 @@
 from blessed import Terminal
 
 from level_maker import make_dictionary_map
-from perams import objects
+import json
+
+#loads the objects list from json file
+file = open('objects.json')
+objects = json.load(file)
+file.close
 
 Point = tuple[int, int]
 term = Terminal()
