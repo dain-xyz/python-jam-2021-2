@@ -155,7 +155,7 @@ class LevelState:
 
     @property
     def grab_direction(self):
-        return point_sub(self.grab_pos, self.player_pos)
+        return point_sub(self.grab_pos, self.player_pos) if self.is_grabbing else None
     
 
     def grab(self, direction: Point) -> None:
