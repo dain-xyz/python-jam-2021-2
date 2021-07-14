@@ -124,6 +124,18 @@ class LevelState:
         
         self._move_unsafe(old, new)
     
+    def str_to_point(self, direction: str) -> Point:
+
+        direction = direction.lower()
+        if direction == "up":
+            return Point(0, -1)
+        elif direction == "down":
+            return Point(0, 1)
+        elif direction == "left":
+            return Point(-1, 0)
+        elif direction == "right":
+            return Point(1, 0)
+    
 
     @property
     def player_pos(self) -> Point:
@@ -158,7 +170,10 @@ class LevelState:
         return point_sub(self.grab_pos, self.player_pos) if self.is_grabbing else None
     
 
-    def grab(self, direction: Point) -> None:
+    def grab(self, direction_str: str) -> None:
+        
+        direction = self.str_to_point(direction_str[0])
+
         target = point_add(self.player_pos, direction)
         if self._tiles[target].top is not Box:
             return
@@ -170,7 +185,10 @@ class LevelState:
         self._grab_pos = None
     
 
-    def move_player(self, direction):
+    def move_player(self, direction_str: str):
+
+        direction = self.str_to_point(direction_str[0])
+
         box_pos = self.grab_pos
         player_destination = point_add(self.player_pos, direction)
     
@@ -220,4 +238,3 @@ class LevelState:
         
         lines = ["".join(line) for line in array]
         return "\n".join(lines)
-
