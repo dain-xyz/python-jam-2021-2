@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Tuple, Type
+from typing import Tuple, Type, Iterator
 import json
 from pathlib import Path
 from itertools import product
@@ -11,28 +11,32 @@ from PIL import Image
 
 from tiles import Tile, Player, Air, Wall, Box, Enemy, Fire
 
-Point = namedtuple("Point", ["x", "y"])
 
-def point_add(a, b):
-    # todo: this stuff really needs to be a dataclass with proper __add__ method
-    # but for the moment we want to be able to just type (3, 4) for debugging
-    # rather than always Point(3, 4)
+@dataclass(frozen=True, order=True)
+class Point:
+    x: int
+    y: int
 
-    return Point(a[0] + b[0], a[1] + b[1])
+    def __add__(self, other: "Point") -> "Point":
+        return Point(self.x + other.x, self.y + other.y)
+    
+    def __sub__(self, other: "Point") -> "Point":
+        return Point(self.x - other.x, self.y - other.y)
+    
+    def __neg__(self) -> "Point":
+        return Point(-self.x, -self.y)
 
-def point_sub(a, b):
-    # likewise
-    return Point(a[0] - b[0], a[1] - b[1])
-
-def point_inv(a):
-    # likewise
-    return Point(-a[0], -a[1])
+    def __iter__(self) -> Iterator[int]:
+        return iter((self.x, self.y))
 
 
-UP = Point(0, -1)
-DOWN = Point(0, 1)
-LEFT = Point(-1, 0)
-RIGHT = Point(1, 0)
+P = Point
+
+
+UP = P(0, -1)
+DOWN = P(0, 1)
+LEFT = P(-1, 0)
+RIGHT = P(1, 0)
 DIRECTIONS = {UP, DOWN, LEFT, RIGHT}
 
 
@@ -155,11 +159,11 @@ class LevelState:
 
     @property
     def grab_direction(self):
-        return point_sub(self.grab_pos, self.player_pos) if self.is_grabbing else None
+        return self.grab_pos - self.player_pos if self.is_grabbing else None
     
 
     def grab(self, direction: Point) -> None:
-        target = point_add(self.player_pos, direction)
+        target = self.player_pos + direction
         if self._tiles[target].top is not Box:
             return
         
@@ -172,14 +176,14 @@ class LevelState:
 
     def move_player(self, direction):
         box_pos = self.grab_pos
-        player_destination = point_add(self.player_pos, direction)
+        player_destination = self.player_pos + direction
     
         if not self.is_grabbing:
             if self.can_move(self.player_pos, player_destination):
                 self.player_pos = player_destination
             return
         
-        box_destination = point_add(box_pos, direction)
+        box_destination = box_pos + direction
 
         # pushing
         if player_destination == box_pos:
