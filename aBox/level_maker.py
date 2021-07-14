@@ -40,16 +40,28 @@ RIGHT = P(1, 0)
 DIRECTIONS = {UP, DOWN, LEFT, RIGHT}
 
 
-@dataclass
 class TileStack:
-    contents: list[Type[Tile]]
+    def __init__(self, level, position, contents=None):
+        self.level = level
+        self.position = position
+        self.contents = []
+
+        if contents:
+            for tile in contents:
+                self.push(tile)
+
     
-    def push(self, x):
-        self.contents.append(x)
+    def push(self, tile):
+        tile.stack = self
+        self.contents.append(tile)
     
+
     def pop(self):
-        return self.contents.pop()
+        tile = self.contents.pop()
+        tile.stack = None
+        return tile
     
+
     @property
     def top(self):
         return self.contents[-1]
@@ -58,21 +70,30 @@ class TileStack:
 
 
 class LevelState:
-    def __init__(self, tilemap: dict[Point, Type[Tile]]):
-        self._tiles = {}
+    # def __init__(self, tilemap: dict[Point, Type[Tile]]):
+    #     self._tiles = {}
 
-        for point, raw_tile in tilemap.items():
-            if raw_tile is Air:
-                self._tiles[point] = TileStack([Air])
+    #     for point, raw_tile in tilemap.items():
+    #         if raw_tile is Air:
+    #             self._tiles[point] = TileStack([Air])
 
-            elif raw_tile is Player:
-                self._player_pos = point
-                self._tiles[point] = TileStack([Air, Player])
+    #         elif raw_tile is Player:
+    #             self._player_pos = point
+    #             self._tiles[point] = TileStack([Air, Player])
 
-            else:
-                self._tiles[point] = TileStack([Air, raw_tile])
+    #         else:
+    #             self._tiles[point] = TileStack([Air, raw_tile])
         
-        self._grab_pos = None
+    #     self._grab_pos = None
+
+    def __init__(self, tilemap: dict[Point, Sequence[Tile]]):
+        self._stacks = {}
+        
+        for loc, tiles in tilemap.items():
+            self._stacks[loc] = Tilemap(self, loc, tiles)
+        
+        # have to write method to push into level and remove from level
+        # so that the indexes are maintained
 
 
     @classmethod
