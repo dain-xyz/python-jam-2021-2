@@ -44,24 +44,32 @@ class Tile:
 
 
 class Player(Tile):
-    pass
+    symbol = "O"
+
+    @property
+    def is_dead(self):
+        return self.stack.contents[-2].lethal
 
 
 class Floor(Tile):
-    pass
+    symbol = " "
 
 
 class Wall(Tile):
+    symbol = "\u2588"
     solid = True
 
 
 class Box(Tile):
+    symbol = "\u25a0"
     solid = True
 
 
 class Enemy(Tile):
+    symbol = "X"
     lethal = True
 
 
 class Fire(Tile):
+    symbol = "F"
     lethal = True

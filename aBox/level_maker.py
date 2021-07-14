@@ -1,10 +1,11 @@
 from dataclasses import dataclass
-from typing import Tuple, Type, Iterator
+from typing import Tuple, Type, Iterator, Sequence
 import json
 from pathlib import Path
 from itertools import product
 from collections import defaultdict, namedtuple
 from functools import cached_property
+from enum import Enum, auto
 
 from rich import print
 from PIL import Image
@@ -32,12 +33,55 @@ class Point:
 
 P = Point
 
+class Action(Enum):
+    move_up = auto()
+    move_down = auto()
+    move_left = auto()
+    move_right = auto()
+    grab_up = auto()
+    grab_down = auto()
+    grab_left = auto()
+    grab_right = auto()
+    ungrab = auto()
+    wait = auto()
+
 
 UP = P(0, -1)
 DOWN = P(0, 1)
 LEFT = P(-1, 0)
 RIGHT = P(1, 0)
 DIRECTIONS = {UP, DOWN, LEFT, RIGHT}
+
+
+moves = {
+    Action.move_up: UP,
+    Action.move_down: DOWN,
+    Action.move_left: LEFT,
+    Action.move_right: RIGHT
+}
+
+moves_inverse = {
+    UP: Action.move_up,
+    DOWN: Action.move_down,
+    LEFT: Action.move_left,
+    RIGHT: Action.move_right
+}
+
+
+grabs = {
+    Action.grab_up: UP,
+    Action.grab_down: DOWN,
+    Action.grab_left: LEFT,
+    Action.grab_right: RIGHT
+}
+
+grabs_inverse = {
+    UP: Action.grab_up,
+    DOWN: Action.grab_down,
+    LEFT: Action.grab_left,
+    RIGHT: Action.grab_right
+}
+
 
 
 class TileStack:
@@ -85,9 +129,12 @@ class LevelState:
         self.stacks = {}
         self.tiles = defaultdict(set)
 
-        for position, tile in tilemap.items():
+        for position, tiles in tilemap.items():
             self.stacks[position] = TileStack(self, position)
-            self.push_tile(position, tile)
+            for tile in tiles:
+                self.push_tile(position, tile)
+        
+        self.grab_target = None
     
 
     def push_tile(self, position, tile):
@@ -117,21 +164,26 @@ class LevelState:
         }
 
         tilemap = {}
+        n_players = 0
         for x, y in coords:
             position = Point(x, y)
             tile_type = colormap[pixel_map[x, y]]
             if tile_type is Floor:
                 tilemap[position] = [Floor()]
+            elif tile_type is Player:
+                tilemap[position] = [Floor(), Player()]
+                n_players += 1
             else:
                 tilemap[position] = [Floor(), tile_type()]
 
-        players = [x for x in tilemap.values() if isinstance(x, Player)]
-        if (n_players := len(players)) != 1:
+        if n_players != 1:
             raise ValueError(f"must have exactly one player tile in the map, got: {n_players}")
         
+        # print(tilemap)
         return LevelState(tilemap)
     
 
+    @property
     def player(self):
         player_set = self.tiles[Player]
         if not player_set:
@@ -141,6 +193,19 @@ class LevelState:
             raise RuntimeError("more than one player in level")
         
         return next(iter(player_set))
+
+    @property
+    def grab_pos(self):
+        return self.grab_target.position if self.grab_target else None
+    
+    @property
+    def is_grabbing(self):
+        return bool(self.grab_target)
+
+    @property
+    def grab_direction(self):
+        if self.is_grabbing:
+            return self.grab_target.position - self.player.position
     
 
     @cached_property
@@ -151,6 +216,70 @@ class LevelState:
     
     def is_solid(self, point: Point) -> bool:
         return self.stacks[point].top.solid
+    
+
+    def move_unsafe(self, tile, destination):
+        # WARNING: this does not check if the destination is solid!
+        self.remove_tile(tile)
+        self.push_tile(destination, tile)
+
+
+    def update(self, action: Action) -> None:
+        if not isinstance(action, Action):
+            raise TypeError(f"{action} is not a valid Action")
+
+        if action == Action.wait:
+            pass
+
+        elif action == Action.ungrab:
+            self.grab_target = None
+
+        elif action in grabs:
+            grab_direction = grabs[action]
+            grab_target_pos = self.player.position + grab_direction
+            grab_target_occupant = self.stacks[grab_target_pos].top
+
+            if isinstance(grab_target_occupant, Box):
+                self.grab_target = grab_target_occupant
+
+        elif action in moves:
+            move_direction = moves[action]
+            player_target_pos = self.player.position + move_direction
+            player_target_occupant = self.stacks[player_target_pos].top
+
+            if not player_target_occupant.solid:
+                self.move_unsafe(self.player, player_target_pos)
+        
+    
+    def ungrab(self):
+        self.update(Action.ungrab)
+    
+
+    def move_player(self, direction):
+        self.update(moves_inverse[direction])
+    
+
+    def grab(self, direction):
+        self.update(grabs_inverse[direction])
+    
+
+    def __str__(self) -> str:
+        # this is for debugging purposes, not necessarily for the actual program
+        
+        array = [
+            [None for x in range(self.size.x)]
+            for y in range(self.size.y)
+        ]
+
+        for (x, y), stack in self.stacks.items():
+            array[y][x] = stack.top.symbol
+        
+        lines = ["".join(line) for line in array]
+        return "\n".join(lines)
+        
+
+
+
 
     
     # def _move_unsafe(self, old: Point, new: Point) -> None:
@@ -180,88 +309,76 @@ class LevelState:
     #     self._player_pos = new
 
 
-    @property
-    def grab_pos(self) -> Point:
-        if self._grab_pos is None:
-            return None
+    # @property
+    # def grab_pos(self) -> Point:
+    #     if self._grab_pos is None:
+    #         return None
         
-        tile = self._tiles[self._grab_pos]
-        if tile.top is not Box:
-            raise RuntimeError(f"thought tile {tile} at {self._grab_pos} had box at top, but it doesn't")
+    #     tile = self._tiles[self._grab_pos]
+    #     if tile.top is not Box:
+    #         raise RuntimeError(f"thought tile {tile} at {self._grab_pos} had box at top, but it doesn't")
         
-        return self._grab_pos
+    #     return self._grab_pos
     
 
-    @property
-    def is_grabbing(self):
-        return bool(self.grab_pos)
+    # @property
+    # def is_grabbing(self):
+    #     return bool(self.grab_pos)
     
 
-    @property
-    def grab_direction(self):
-        return self.grab_pos - self.player_pos if self.is_grabbing else None
+    # @property
+    # def grab_direction(self):
+    #     return self.grab_pos - self.player_pos if self.is_grabbing else None
     
 
-    def grab(self, direction: Point) -> None:
-        target = self.player_pos + direction
-        if self._tiles[target].top is not Box:
-            return
+    # def grab(self, direction: Point) -> None:
+    #     target = self.player_pos + direction
+    #     if self._tiles[target].top is not Box:
+    #         return
         
-        self._grab_pos = target
+    #     self._grab_pos = target
     
 
-    def ungrab(self) -> None:
-        self._grab_pos = None
+    # def ungrab(self) -> None:
+    #     self._grab_pos = None
     
 
-    def move_player(self, direction):
-        box_pos = self.grab_pos
-        player_destination = self.player_pos + direction
+    # def move_player(self, direction):
+    #     box_pos = self.grab_pos
+    #     player_destination = self.player_pos + direction
     
-        if not self.is_grabbing:
-            if self.can_move(self.player_pos, player_destination):
-                self.player_pos = player_destination
-            return
+    #     if not self.is_grabbing:
+    #         if self.can_move(self.player_pos, player_destination):
+    #             self.player_pos = player_destination
+    #         return
         
-        box_destination = box_pos + direction
+    #     box_destination = box_pos + direction
 
-        # pushing
-        if player_destination == box_pos:
-            if self.can_move(box_pos, box_destination):
-                self.move_topmost(box_pos, box_destination)
-                self.player_pos = player_destination
-                self._grab_pos = box_destination
-            return
+    #     # pushing
+    #     if player_destination == box_pos:
+    #         if self.can_move(box_pos, box_destination):
+    #             self.move_topmost(box_pos, box_destination)
+    #             self.player_pos = player_destination
+    #             self._grab_pos = box_destination
+    #         return
         
-        # pulling
-        if box_destination == self.player_pos:
-            if self.can_move(self.player_pos, player_destination):
-                self.player_pos = player_destination
-                self.move_topmost(box_pos, box_destination)
-                self._grab_pos = box_destination
-            return
+    #     # pulling
+    #     if box_destination == self.player_pos:
+    #         if self.can_move(self.player_pos, player_destination):
+    #             self.player_pos = player_destination
+    #             self.move_topmost(box_pos, box_destination)
+    #             self._grab_pos = box_destination
+    #         return
         
-        # sideways
-        player_can_move = self.can_move(self.player_pos, player_destination)
-        box_can_move = self.can_move(box_pos, box_destination)
+    #     # sideways
+    #     player_can_move = self.can_move(self.player_pos, player_destination)
+    #     box_can_move = self.can_move(box_pos, box_destination)
         
-        if player_can_move and box_can_move:
-            self.player_pos = player_destination
-            self.move_topmost(box_pos, box_destination)
-            self._grab_pos = box_destination
+    #     if player_can_move and box_can_move:
+    #         self.player_pos = player_destination
+    #         self.move_topmost(box_pos, box_destination)
+    #         self._grab_pos = box_destination
 
 
-    def __str__(self) -> str:
-        # this is for debugging purposes, not necessarily for the actual program
-        
-        array = [
-            [None for x in range(self.size.x)]
-            for y in range(self.size.y)
-        ]
 
-        for (x, y), tile in self._tiles.items():
-            array[y][x] = tile.top.symbol
-        
-        lines = ["".join(line) for line in array]
-        return "\n".join(lines)
 
