@@ -9,7 +9,7 @@ from functools import cached_property
 from rich import print
 from PIL import Image
 
-from tiles import Tile, Player, Air, Wall, Box, Enemy, Fire
+from tiles import Tile, Player, Floor, Wall, Box, Enemy, Fire
 
 
 @dataclass(frozen=True, order=True)
@@ -42,6 +42,7 @@ DIRECTIONS = {UP, DOWN, LEFT, RIGHT}
 
 class TileStack:
     def __init__(self, level, position, contents=None):
+        # a TileStack knows what level it belongs to
         self.level = level
         self.position = position
         self.contents = []
@@ -52,6 +53,8 @@ class TileStack:
 
     
     def push(self, tile):
+        # tiles must know what stack they belong to, and by extension
+        # they can query their position, level, and so on.
         tile.stack = self
         self.contents.append(tile)
     
@@ -62,39 +65,40 @@ class TileStack:
         return tile
     
 
+    def remove(self, tile):
+        self.contents.remove(tile)
+        tile.stack = None
+    
+
     @property
     def top(self):
         return self.contents[-1]
     
 
+    def __iter__(self):
+        return iter(self.contents)
+
 
 
 class LevelState:
-    # def __init__(self, tilemap: dict[Point, Type[Tile]]):
-    #     self._tiles = {}
-
-    #     for point, raw_tile in tilemap.items():
-    #         if raw_tile is Air:
-    #             self._tiles[point] = TileStack([Air])
-
-    #         elif raw_tile is Player:
-    #             self._player_pos = point
-    #             self._tiles[point] = TileStack([Air, Player])
-
-    #         else:
-    #             self._tiles[point] = TileStack([Air, raw_tile])
-        
-    #     self._grab_pos = None
-
     def __init__(self, tilemap: dict[Point, Sequence[Tile]]):
-        self._stacks = {}
-        
-        for loc, tiles in tilemap.items():
-            self._stacks[loc] = Tilemap(self, loc, tiles)
-        
-        # have to write method to push into level and remove from level
-        # so that the indexes are maintained
+        self.stacks = {}
+        self.tiles = defaultdict(set)
 
+        for position, tile in tilemap.items():
+            self.stacks[position] = TileStack(self, position)
+            self.push_tile(position, tile)
+    
+
+    def push_tile(self, position, tile):
+        self.stacks[position].push(tile)
+        self.tiles[type(tile)].add(tile)
+    
+
+    def remove_tile(self, tile):
+        tile.stack.remove(tile)
+        self.tiles[type(tile)].remove(tile)
+    
 
     @classmethod
     def from_image(self, img) -> "LevelState":
@@ -104,7 +108,7 @@ class LevelState:
 
         # temporary, this will eventually be pulled from a config file or something
         colormap = {
-            (255, 255, 255): Air,
+            (255, 255, 255): Floor,
             (0, 0, 0): Wall,
             (0, 162, 232): Player,
             (255, 127, 39): Box,
@@ -112,53 +116,68 @@ class LevelState:
             (136, 0, 21): Fire,
         }
 
-        tilemap = {
-            Point(x, y): colormap[pixel_map[x, y]]
-            for x, y in coords
-        }
+        tilemap = {}
+        for x, y in coords:
+            position = Point(x, y)
+            tile_type = colormap[pixel_map[x, y]]
+            if tile_type is Floor:
+                tilemap[position] = [Floor()]
+            else:
+                tilemap[position] = [Floor(), tile_type()]
 
-        players = [x for x in tilemap.values() if x is Player]
+        players = [x for x in tilemap.values() if isinstance(x, Player)]
         if (n_players := len(players)) != 1:
             raise ValueError(f"must have exactly one player tile in the map, got: {n_players}")
         
         return LevelState(tilemap)
     
 
+    def player(self):
+        player_set = self.tiles[Player]
+        if not player_set:
+            raise RuntimeError("tried to access player but no player in the level")
+
+        if len(player_set) > 1:
+            raise RuntimeError("more than one player in level")
+        
+        return next(iter(player_set))
+    
+
     @cached_property
     def size(self) -> Point:
-        x, y = max(self._tiles.keys())
+        x, y = max(self.stacks.keys())
         return Point(x + 1, y + 1)
 
     
     def is_solid(self, point: Point) -> bool:
-        return self._tiles[point].top.solid
+        return self.stacks[point].top.solid
 
     
-    def _move_unsafe(self, old: Point, new: Point) -> None:
-        thing = self._tiles[old].pop()
-        self._tiles[new].push(thing)
+    # def _move_unsafe(self, old: Point, new: Point) -> None:
+    #     thing = self._tiles[old].pop()
+    #     self._tiles[new].push(thing)
 
 
-    def can_move(self, old: Point, new: Point) -> bool:
-        return not self.is_solid(new)
+    # def can_move(self, old: Point, new: Point) -> bool:
+    #     return not self.is_solid(new)
 
 
-    def move_topmost(self, old: Point, new: Point) -> None:
-        if not self.can_move(old, new):
-            raise ValueError(f"cannot move from {old} to {new}: destination is solid: {self._tiles[new]}")
+    # def move_topmost(self, old: Point, new: Point) -> None:
+    #     if not self.can_move(old, new):
+    #         raise ValueError(f"cannot move from {old} to {new}: destination is solid: {self._tiles[new]}")
         
-        self._move_unsafe(old, new)
+    #     self._move_unsafe(old, new)
     
 
-    @property
-    def player_pos(self) -> Point:
-        return self._player_pos
+    # @property
+    # def player_pos(self) -> Point:
+    #     return self._player_pos
     
 
-    @player_pos.setter
-    def player_pos(self, new: Point) -> None:
-        self.move_topmost(self.player_pos, new)
-        self._player_pos = new
+    # @player_pos.setter
+    # def player_pos(self, new: Point) -> None:
+    #     self.move_topmost(self.player_pos, new)
+    #     self._player_pos = new
 
 
     @property

@@ -27,9 +27,12 @@
 #     symbol = "F"
 
 class Tile:
+    solid = False
+    lethal = False
+
     def __init__(self, stack=None):
         self.stack = stack
-        self.target = None
+        self.move_target = None # make this a tuple of old/new?
 
     @property
     def position(self):
@@ -49,16 +52,16 @@ class Floor(Tile):
 
 
 class Wall(Tile):
-    pass
+    solid = True
 
 
 class Box(Tile):
-    pass
+    solid = True
 
 
 class Enemy(Tile):
-    pass
+    lethal = True
 
 
 class Fire(Tile):
-    pass
+    lethal = True
