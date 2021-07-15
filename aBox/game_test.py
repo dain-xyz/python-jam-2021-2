@@ -5,9 +5,6 @@ import time
 import blessed
 
 
-level_path = Path("levels/level1.png")
-level = LevelState.from_image(level_path)
-
 def level_print(term, level) -> None:
     print(term.home + term.clear)
 
@@ -25,7 +22,7 @@ moves = {
     "KEY_DOWN": DOWN,
 }
 
-if __name__ == "__main__":
+def test_level(level):
     term = blessed.Terminal()
 
     with term.hidden_cursor(), term.cbreak():
@@ -39,6 +36,7 @@ if __name__ == "__main__":
             print(f"{level.grab_pos=}")
             print(f"{level.is_grabbing=}")
             print(f"{level.grab_direction=}")
+            print(f"{level.won=}")
             print(f"[q]uit, [s]wap mode, [g]rab mode, [u]ngrab, arrowkeys to move")
             print(f"[debug only] = {mode=}")
             cmd = term.inkey()
@@ -60,3 +58,9 @@ if __name__ == "__main__":
                     else:
                         level.grab(direction)
                         mode = "move"
+
+
+if __name__ == "__main__":
+    level_path = Path("levels/level1.png")
+    level = LevelState.from_image(level_path)
+    test_level(level)

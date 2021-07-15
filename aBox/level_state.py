@@ -11,7 +11,7 @@ import pprint
 from rich import print
 from PIL import Image
 
-from tiles import Tile, Player, Floor, Wall, Box, Enemy, Fire
+from tiles import Tile, Player, Floor, Wall, Box, Enemy, Fire, Win
 
 
 @dataclass(frozen=True, order=True)
@@ -207,6 +207,10 @@ class LevelState:
     def grab_direction(self):
         if self.is_grabbing:
             return self.grab_target.position - self.player.position
+    
+    @property
+    def won(self):
+        return all(isinstance(box.tile_below, Win) for box in self.tiles[Box])
     
 
     @cached_property

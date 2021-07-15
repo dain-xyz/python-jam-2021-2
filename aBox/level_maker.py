@@ -32,7 +32,8 @@ tile_keys = {
     "w": tiles.Wall,
     "p": tiles.Player,
     "b": tiles.Box,
-    "f": tiles.Fire
+    "f": tiles.Fire,
+    "i": tiles.Win
 }
 
 
@@ -53,7 +54,7 @@ def edit_level(level):
             current_contents = current_stack.contents
             contents_strs = [x.__class__.__name__ for x in current_contents]
             print(f"current contents: {contents_strs}")
-            print(f"insert tile: [w]all, [p]layer, [b]ox, [f]ire") # need to keep this in sync with tile_keys
+            print(f"insert tile: [w]all, [p]layer, [b]ox, [f]ire, w[i]n") # need to keep this in sync with tile_keys
             print(f"[s]ave to file, [q]uit, [del]ete topmost tile")
             print("note: this will not stop you doing 'illegal' configurations like putting box inside a wall")
             print("[q]uit")

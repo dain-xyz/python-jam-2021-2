@@ -53,6 +53,10 @@ class Box(Tile):
     solid = True
 
 
+class Win(Tile):
+    symbol = "."
+
+
 class Enemy(Tile):
     symbol = "X"
     lethal = True
