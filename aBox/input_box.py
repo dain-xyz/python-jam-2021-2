@@ -29,8 +29,12 @@ def create_box(level_width, term, key, display_list, cx, cy) -> None:
     hl_num_color = term.color_rgb(255, 0, 0)
 
     if key and not key.is_sequence:
-        display_list[cy] = display_list[cy][:cx] + key + display_list[cy][cx:]
-        cx += 1
+        if key != "(":
+            display_list[cy] = display_list[cy][:cx] + key + display_list[cy][cx:]
+            cx += 1
+        else:# key is (
+            display_list[cy] = display_list[cy][:cx] + "()" + display_list[cy][cx:]
+            cx += 1
 
     elif key.is_sequence:
         if key.name == "KEY_ENTER":

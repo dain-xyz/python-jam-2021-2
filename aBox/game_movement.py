@@ -14,8 +14,19 @@ def level_print(term, level) -> None:
     term.move_xy(0, 0)
     buffer = ""
     for (x, y), tile in level._tiles.items():
-        foo = term.move_xy(x, y) + term.white(tile.top.symbol)
-        buffer += foo
+        symbol = tile.top.symbol
+        buffer += term.move_xy(x, y)
+        if symbol == "O":# Player
+            buffer += term.black_on_yellow("O")
+        elif symbol == "X":
+            buffer += term.black_on_red("X")
+        elif symbol == "\u25a0":
+            buffer += term.blue_on_black("\u25a0")
+        elif symbol == "\u2588":
+            buffer += term.sienna4("\u2588")
+        else:
+            buffer += " "
+        
     print(buffer)
 
 
