@@ -3,7 +3,7 @@ from custom_parser import eval, parse
 
 
 
-def create_box(level_width, term, key, display_list, cx, cy, functions) -> None:
+def create_box(level_width, term, key, display_list, cx, cy) -> None:
     """Creates a text-input-box"""
 
 
@@ -90,12 +90,9 @@ def create_box(level_width, term, key, display_list, cx, cy, functions) -> None:
         elif key.name == "KEY_END":
             cx = len(display_list[cy])
         
-        elif key.name == "KEY_F5":
-            full = ""
-            for line in display_list:
-                full += line + "\n"
-        
-            eval(parse(full), functions)
+        elif key.name == "KEY_F5": 
+            return display_list, cx, cy, 1# set mode to run
+
 
 
     for y in range(1, len(display_list)+3):
@@ -123,7 +120,7 @@ def create_box(level_width, term, key, display_list, cx, cy, functions) -> None:
 
         #print(term.move_xy(0, cy + 10),"Dobug:", cx, cy, key, key.name) #for debuging
 
-    return display_list, cx, cy
+    return display_list, cx, cy, 0
 
 
 

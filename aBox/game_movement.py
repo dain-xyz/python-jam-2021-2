@@ -7,6 +7,8 @@ import blessed
 
 level_path = Path("levels/level1.png")
 level = LevelState.from_image(level_path)
+    
+
 
 def level_print(term, level) -> None:
     term.move_xy(0, 0)
@@ -15,7 +17,7 @@ def level_print(term, level) -> None:
         foo = term.move_xy(x, y) + term.white(tile.top.symbol)
         buffer += foo
     print(buffer)
-    print(term.move_y(level.size.y))
+
 
 
 moves = {
