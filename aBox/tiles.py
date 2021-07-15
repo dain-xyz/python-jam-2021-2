@@ -56,7 +56,7 @@ class Floor(Tile):
 
 
 class Wall(Tile):
-    symbol = "\u2588"
+    symbol = "🮐"
     solid = True
 
 
