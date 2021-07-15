@@ -1,31 +1,3 @@
-# class Tile:
-#     solid = False
-#     movable = False
-
-
-# class Player(Tile):
-#     symbol = "O"
-#     movable = True
-
-# class Air(Tile):
-#     symbol = " "
-
-# class Wall(Tile):
-#     symbol = "\u2588"
-#     solid = True
-
-# class Box(Tile):
-#     symbol = "\u25a0"
-#     solid = True
-#     movable = True
-
-# class Enemy(Tile):
-#     symbol = "X"
-#     solid = True
-
-# class Fire(Tile):
-#     symbol = "F"
-
 class Tile:
     solid = False
     lethal = False
@@ -41,6 +13,22 @@ class Tile:
     @property
     def level(self):
         return self.stack.level
+    
+    @property
+    def tile_below(self):
+        if len(self.stack.contents) == 1:
+            return None
+
+        index = self.stack.contents.index(self)
+        return self.stack.contents[index - 1]
+    
+    @property
+    def tile_above(self):
+        if self.stack.top == self:
+            return None
+        
+        index = self.stack.contents.index(self)
+        return self.stack.contents[index + 1]
 
 
 class Player(Tile):

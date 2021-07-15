@@ -89,7 +89,7 @@ class TileStack:
         # a TileStack knows what level it belongs to
         self.level = level
         self.position = position
-        self.contents = []
+        self.contents = [] # this would probably be better as a linked list
 
         if contents:
             for tile in contents:
@@ -99,7 +99,7 @@ class TileStack:
     def push(self, tile):
         # tiles must know what stack they belong to, and by extension
         # they can query their position, level, and so on.
-        tile.stack = self
+        tile.stack = self        
         self.contents.append(tile)
     
 
