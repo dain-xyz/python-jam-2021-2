@@ -1,27 +1,7 @@
 import blessed
 from level_state import Point, UP, DOWN, LEFT, RIGHT, LevelState
 import tiles
-import json
-
-with open("objects.json", "r") as file:
-    data = json.load(file)
-
-resolution = [int(input("Resolution X: ")), int(input("Resolution Y: "))]
-# print(resolution[1]+2)
-
-tilemap = {}
-for y in range(resolution[1]):
-    for x in range(resolution[0]):
-        tilemap[Point(x,y)] = [tiles.Floor()]
-level = LevelState(tilemap)
-
-# def get_char(object:str):
-#     """
-#     Gets the char from json file.
-#     """
-#     for i in data:
-#         if i["ob"] == object:
-#             return i["char"]
+import sys
 
 
 def level_with_border(level: LevelState) -> str:
@@ -55,7 +35,8 @@ tile_keys = {
     "f": tiles.Fire
 }
 
-if __name__ == "__main__":
+
+def edit_level(level):
     term = blessed.Terminal()
     level_pos = Point(0, 0)
 
@@ -101,3 +82,16 @@ if __name__ == "__main__":
                 
                 elif cmd.name == "KEY_DELETE" and len(current_contents) > 1:
                     level.remove_tile(current_stack.top)
+
+
+if __name__ == "__main__":
+    resolution = [int(input("Resolution X: ")), int(input("Resolution Y: "))]
+
+    tilemap = {}
+    for y in range(resolution[1]):
+        for x in range(resolution[0]):
+            tilemap[Point(x,y)] = [tiles.Floor()]
+
+    level = LevelState(tilemap)
+
+    edit_level(level)
