@@ -229,7 +229,7 @@ class LevelState:
             raise TypeError(f"{action} is not a valid Action")
 
         if action == Action.wait:
-            pass
+            return
 
         elif action == Action.ungrab:
             self.grab_target = None
@@ -247,8 +247,38 @@ class LevelState:
             player_target_pos = self.player.position + move_direction
             player_target_occupant = self.stacks[player_target_pos].top
 
-            if not player_target_occupant.solid:
-                self.move_unsafe(self.player, player_target_pos)
+            if not self.is_grabbing:
+                if not player_target_occupant.solid:
+                    self.move_unsafe(self.player, player_target_pos)
+                return # may not be able to return when this gets more complicated
+            
+            box_target_pos = self.grab_pos + move_direction
+            box_target_occupant = self.stacks[box_target_pos].top
+
+            # pushing
+            if move_direction == self.grab_direction:
+                if not box_target_occupant.solid:
+                    self.move_unsafe(self.grab_target, box_target_pos)
+                    self.move_unsafe(self.player, player_target_pos)
+            
+            # pulling
+            elif move_direction == -self.grab_direction:
+                if not player_target_occupant.solid:
+                    self.move_unsafe(self.player, player_target_pos)
+                    self.move_unsafe(self.grab_target, box_target_pos)
+            
+            # sideways
+            else:
+                if not (player_target_occupant.solid or box_target_occupant.solid):
+                    self.move_unsafe(self.player, player_target_pos)
+                    self.move_unsafe(self.grab_target, box_target_pos)
+
+
+            
+
+            
+
+
         
     
     def ungrab(self):
