@@ -6,6 +6,7 @@ from itertools import product
 from collections import defaultdict, namedtuple
 from functools import cached_property
 from enum import Enum, auto
+import pprint
 
 from rich import print
 from PIL import Image
@@ -299,4 +300,14 @@ class LevelState:
         
         lines = ["".join(line) for line in array]
         return "\n".join(lines)
+    
+
+    def serialize_to_code(self) -> str:
+        # generates code to remake the level with the same tile positions
+        # but loses state like grab target, so it is not strictly a repr
+        tiles_as_strings = {
+            pos: [f"{x.__class__.__name__}()" for x in stack.contents]
+            for pos, stack in self.stacks.items()
+        }
+        return pprint.pformat(tiles_as_strings, indent=4).replace("'", "")
         

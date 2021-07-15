@@ -36,7 +36,7 @@ class Player(Tile):
 
     @property
     def is_dead(self):
-        return self.stack.contents[-2].lethal
+        return self.tile_below.lethal
 
 
 class Floor(Tile):

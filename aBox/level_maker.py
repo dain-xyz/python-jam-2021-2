@@ -73,7 +73,7 @@ if __name__ == "__main__":
             contents_strs = [x.__class__.__name__ for x in current_contents]
             print(f"current contents: {contents_strs}")
             print(f"insert tile: [w]all, [p]layer, [b]ox, [f]ire") # need to keep this in sync with tile_keys
-            print(f"[q]uit, [del]ete topmost tile")
+            print(f"[s]ave to file, [q]uit, [del]ete topmost tile")
             print("note: this will not stop you doing 'illegal' configurations like putting box inside a wall")
             print("[q]uit")
 
@@ -81,6 +81,12 @@ if __name__ == "__main__":
 
             if cmd == "q":
                 break
+            
+            if cmd == "s":
+                serialized = level.serialize_to_code()
+                filename = input("filename (cursor is invisible): ")
+                with open(filename, "w") as f:
+                    f.write(serialized)
             
             elif cmd in tile_keys:
                 new_tile = tile_keys[cmd]()
