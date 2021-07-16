@@ -1,4 +1,4 @@
-from level_maker import LevelState, UP, DOWN, LEFT, RIGHT, DIRECTIONS
+from level_state import LevelState, UP, DOWN, LEFT, RIGHT, DIRECTIONS
 from pathlib import Path
 import time
 
@@ -13,7 +13,7 @@ level = LevelState.from_image(level_path)
 def level_print(term, level) -> None:
     term.move_xy(0, 0)
     buffer = ""
-    for (x, y), tile in level._tiles.items():
+    for (x, y), tile in level.stacks.items():
         symbol = tile.top.symbol
         buffer += term.move_xy(x, y)
         if symbol == "O":# Player

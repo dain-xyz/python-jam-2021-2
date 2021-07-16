@@ -3,7 +3,7 @@ from blessed import Terminal
 from pathlib import Path
 from input_box import create_box
 from game_movement import level_print
-from level_maker import LevelState, UP, DOWN, LEFT, RIGHT, DIRECTIONS
+from level_state import LevelState, UP, DOWN, LEFT, RIGHT, DIRECTIONS
 from custom_parser import eval, parse
 
 term = Terminal()
@@ -33,7 +33,7 @@ if __name__ == '__main__':
             key = term.inkey()
             #print(term.home + term.clear)
             #level_print(term, level)
-            display_list, cx, cy, mode = create_box(level.size[0]+10, term, key, display_list, cx, cy)
+            display_list, cx, cy, mode = create_box(level.size.x + 10, term, key, display_list, cx, cy)
 
             if prev_mode != mode and mode == 1: # mode changed to run mode
                 eval(parse("".join(display_list)), functions)
