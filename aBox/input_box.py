@@ -1,6 +1,4 @@
 from blessed import Terminal
-from custom_parser import eval, parse
-
 
 
 def create_box(level_width, term, key, display_list, cx, cy) -> None:

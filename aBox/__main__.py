@@ -4,7 +4,10 @@ from pathlib import Path
 from input_box import create_box
 from game_movement import level_print
 from level_state import LevelState, UP, DOWN, LEFT, RIGHT, DIRECTIONS
-from custom_parser import eval, parse
+# from custom_parser import eval, parse
+from interpreter import interpret, parse
+from utils import Action
+import time
 
 term = Terminal()
 
@@ -36,7 +39,16 @@ if __name__ == '__main__':
             display_list, cx, cy, mode = create_box(level.size.x + 10, term, key, display_list, cx, cy)
 
             if prev_mode != mode and mode == 1: # mode changed to run mode
-                eval(parse("".join(display_list)), functions)
+                # eval(parse("".join(display_list)), functions)
+                parsed = parse("".join(display_list))
+                program = interpret(parsed)
+                
+                for action in program:
+                    if isinstance(action, Action):
+                        level.update(action)
+                        level_print(term, level)
+                        time.sleep(1)
+
                 mode = 0
                 level_print(term, level)
             
