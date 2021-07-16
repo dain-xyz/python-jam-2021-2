@@ -42,7 +42,6 @@ def create_box(level_width, term, key, display_list, cx, cy) -> None:
             display_list[cy] = display_list[cy][:cx]
             cy += 1
             cx = 0
-
         elif key.name == "KEY_BACKSPACE":
             if cx <= 0:
                 if cy > 0:
@@ -93,6 +92,10 @@ def create_box(level_width, term, key, display_list, cx, cy) -> None:
 
         elif key.name == "KEY_END":
             cx = len(display_list[cy])
+
+        elif key.name == "KEY_TAB":
+            cx += 4
+            display_list[cy] = display_list[cy][cx:]+"    "+display_list[cy][:cx]
         
         elif key.name == "KEY_F5": 
             return display_list, cx, cy, 1# set mode to run

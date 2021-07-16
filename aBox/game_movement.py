@@ -23,7 +23,7 @@ def level_print(term, level) -> None:
         elif symbol == "\u25a0":
             buffer += term.blue_on_black("\u25a0")
         elif symbol == "\u2588":
-            buffer += term.sienna4("\u2588")
+            buffer += term.sienna4("▒")
         else:
             buffer += " "
         

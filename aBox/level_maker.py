@@ -181,7 +181,7 @@ class LevelState:
         self._grab_pos = target
     
 
-    def ungrab(self) -> None:
+    def ungrab(self, *args) -> None:
         self._grab_pos = None
     
 
