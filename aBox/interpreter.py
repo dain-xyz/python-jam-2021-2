@@ -172,6 +172,7 @@ def interpret(parsed):
                 
                 else:
                     reply = variables[name]
+                    yield
             
             elif instruction == "func":
                 reply = args[0]
