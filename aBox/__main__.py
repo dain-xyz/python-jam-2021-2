@@ -11,7 +11,11 @@ import time
 
 term = Terminal()
 
-current_level = Path("levels/level2.png")
+current_level = Path("levels/level1.png")
+
+level_num = 1
+
+
 # level = LevelState.from_image(current_level)
 
 # functions = {
@@ -52,6 +56,10 @@ if __name__ == '__main__':
                         time.sleep(0.5)
 
                 mode = 0
+
+                if level.won:# level won
+                    level_num += 1
+                    current_level = Path(f"levels\level{level_num}.png")
                 level_print(term, level)
             
             prev_mode = mode

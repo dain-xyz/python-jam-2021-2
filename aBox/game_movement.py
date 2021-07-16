@@ -24,6 +24,8 @@ def level_print(term, level) -> None:
             buffer += term.blue_on_black("\u25a0")
         elif symbol == "🮐":
             buffer += term.sienna4("▒")
+        elif symbol == ".":
+            buffer += term.green(".")
         else:
             buffer += " "
         

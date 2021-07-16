@@ -54,6 +54,9 @@ def create_box(level_width, term, key, display_list, cx, cy) -> None:
             display_list[cy] = display_list[cy][:cx]
             cy += 1
             cx = 0
+        
+
+
         elif key.name == "KEY_BACKSPACE":
             if cx <= 0:
                 if cy > 0:
