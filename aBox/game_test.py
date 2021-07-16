@@ -1,19 +1,16 @@
-from level_maker import LevelState, UP, DOWN, LEFT, RIGHT, DIRECTIONS
+from level_state import LevelState, UP, DOWN, LEFT, RIGHT, DIRECTIONS
 from pathlib import Path
 import time
 
 import blessed
 
 
-level_path = Path("levels/level1.png")
-level = LevelState.from_image(level_path)
-
 def level_print(term, level) -> None:
     print(term.home + term.clear)
 
-    for (x, y), tile in level._tiles.items():
-        foo = term.move_xy(x, y) + term.white(tile.top.symbol)
-        print(foo)
+    for (x, y), tile in level.stacks.items():
+        symbol = term.move_xy(x, y) + term.white(tile.top.symbol)
+        print(symbol)
     
     print(term.move_y(level.size.y))
 
@@ -25,7 +22,7 @@ moves = {
     "KEY_DOWN": DOWN,
 }
 
-if __name__ == "__main__":
+def test_level(level):
     term = blessed.Terminal()
 
     with term.hidden_cursor(), term.cbreak():
@@ -34,10 +31,12 @@ if __name__ == "__main__":
         while True:
             level_print(term, level)
             print(f"{level.size=}")
-            print(f"{level.player_pos=}")
+            print(f"{level.player.position=}")
+            print(f"{level.player.is_dead=}")
             print(f"{level.grab_pos=}")
             print(f"{level.is_grabbing=}")
             print(f"{level.grab_direction=}")
+            print(f"{level.won=}")
             print(f"[q]uit, [s]wap mode, [g]rab mode, [u]ngrab, arrowkeys to move")
             print(f"[debug only] = {mode=}")
             cmd = term.inkey()
@@ -59,3 +58,9 @@ if __name__ == "__main__":
                     else:
                         level.grab(direction)
                         mode = "move"
+
+
+if __name__ == "__main__":
+    level_path = Path("levels/level1.png")
+    level = LevelState.from_image(level_path)
+    test_level(level)
