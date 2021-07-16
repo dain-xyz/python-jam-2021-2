@@ -1,5 +1,6 @@
 import blessed
-from level_state import Point, UP, DOWN, LEFT, RIGHT, LevelState
+from level_state import UP, DOWN, LEFT, RIGHT, LevelState
+from utils import Point
 import tiles
 import sys
 
