@@ -14,8 +14,17 @@ Number = (int, float)  # A Lisp Number is implemented as a Python int or float
 Boolean = bool
 
 
+class InterpreterError(Exception):
+    pass
+
+
 def tokenise(chars: str) -> list:
     """Convert a string of characters into a list of tokens."""
+    n_left = chars.count("(")
+    n_right = chars.count(")")
+
+    if n_left != n_right:
+        raise InterpreterError(f"Syntax Error: number of left parens ({n_left}) does not match number of right parens ({n_right})")
 
     return chars.replace("\n", " ").replace('(', ' ( ').replace(')', ' ) ').split()
 
