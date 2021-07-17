@@ -67,7 +67,7 @@ def edit_level(level):
             
             if cmd == "s":
                 serialized = level.serialize_to_code()
-                filename = "level.txt"#input("filename (cursor is invisible): ")
+                filename = "level.txt" #input("filename (cursor is invisible): ")
                 with open(filename, "w") as f:
                     f.write(serialized)
             

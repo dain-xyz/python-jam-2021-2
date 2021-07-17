@@ -5,12 +5,6 @@ import time
 
 import blessed
 
-
-level_path = Path("levels/level1.png")
-level = LevelState.from_image(level_path)
-    
-
-
 def level_print(term, level) -> None:
     term.move_xy(0, 0)
     buffer = ""
@@ -18,15 +12,23 @@ def level_print(term, level) -> None:
         symbol = tile.top.symbol
         buffer += term.move_xy(x, y)
         if symbol == "O":# Player
-            buffer += term.black_on_yellow("O")
+            if level.player.is_dead:
+                buffer += term.black_on_red("B")
+            else:
+                buffer += term.black_on_yellow("B")
+
         elif symbol == "X":
             buffer += term.black_on_red("X")
+
         elif symbol == "\u25a0":
             buffer += term.blue_on_black("\u25a0")
+
         elif symbol == "🮐":
-            buffer += term.sienna4("▒")
+            buffer += term.white("▒")
+
         elif symbol == ".":
             buffer += term.green(".")
+
         else:
             buffer += " "
         
@@ -42,6 +44,9 @@ moves = {
 }
 
 if __name__ == "__main__":
+    level_path = Path("level_images/level1.png")
+    level = LevelState.from_image(level_path)
+
     term = blessed.Terminal()
 
     with term.hidden_cursor(), term.cbreak():
