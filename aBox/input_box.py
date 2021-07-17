@@ -38,11 +38,14 @@ class InputBox:
         value = max(value, 0)
         self.window_loc = replace(self.window_loc, y=value)
     
+    def position_in_window(self, x, y):
+        in_x = self.wx <= x <= self.wx + self.width
+        in_y = self.wy <= y <= self.wy + self.height
+        return in_x and in_y
+    
     @property
     def cursor_in_window(self):
-        in_x = self.wx <= self.x <= self.wx + self.width
-        in_y = self.wy <= self.y <= self.wy + self.height
-        return in_x and in_y
+        return self.position_in_window(self.x, self.y)
     
     @property
     def this_line(self):
@@ -192,6 +195,28 @@ class InputBox:
         elif key.name == "KEY_TAB":
             self.this_line = f"{line_before}    {line_after}"
             self.x += 4
+    
+
+    def match_paren_pairs(self):
+        stack = []
+        lookup = {}
+
+        for y, line in enumerate(self.lines):
+            for x, char in enumerate(line):
+                if char == "(":
+                    open_pos = x, y
+                    stack.append(open_pos)
+                elif char == ")":
+                    if stack:
+                        open_pos = stack.pop()
+                        close_pos = x, y
+                        lookup[open_pos] = close_pos
+                        lookup[close_pos] = open_pos
+                    else:
+                        pass
+        
+        return lookup
+
 
 
     def render(self, location):
@@ -203,6 +228,19 @@ class InputBox:
         cursor_location = location + self.cursor - self.window_loc
         with self.term.location(*term_loc):
             print(self.term.move_xy(*cursor_location) + self.term.green_reverse(self.char_under_cursor))
+        
+        # highlight parentheses
+        if (paren := self.char_under_cursor) in "()":
+            matches = self.match_paren_pairs()
+
+            if (self.x, self.y) in matches:
+                match_location = P(*matches[self.x, self.y])
+
+                if self.position_in_window(*match_location):
+                    match_location_term = location + match_location - self.window_loc
+                    other = ")" if paren == "(" else "("
+                    with self.term.location(*term_loc):
+                        print(self.term.move_xy(*match_location_term) + self.term.blue_reverse(other))
 
     
     @property
