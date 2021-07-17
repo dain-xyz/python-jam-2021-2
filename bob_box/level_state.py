@@ -117,12 +117,13 @@ class LevelState:
 
         # temporary, this will eventually be pulled from a config file or something
         colormap = {
-            (255, 255, 255): Floor,
-            (0, 0, 0): Wall,
-            (0, 162, 232): Player,
-            (255, 127, 39): Box,
-            (237, 28, 36): Enemy,
-            (136, 0, 21): Fire,
+            (255, 255, 255, 255): Floor,
+            (0, 0, 0, 255): Wall,
+            (0, 162, 232, 255): Player,
+            (255, 127, 39, 255): Box,
+            (237, 28, 36, 255): Enemy,
+            (136, 0, 21, 255): Fire,
+            (0, 238, 255, 255): Win,
         }
 
         tilemap = {}
