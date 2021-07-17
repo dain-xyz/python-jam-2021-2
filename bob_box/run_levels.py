@@ -206,16 +206,8 @@ def level_select(term):
                     if results:
                         scores[selection] = results
             
-            if key == "q":
-                return
-
-
-
-
-
-
-    
-
+            # if key == "q":
+            #     return
 
 
 if __name__ == '__main__':

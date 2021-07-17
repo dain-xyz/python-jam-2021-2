@@ -7,7 +7,7 @@ term = Terminal()
 width = 0
 height = 0
 
-optimal_height = 35
+optimal_height = 45
 optimal_width = 80
 
 KEY_UP = 259
