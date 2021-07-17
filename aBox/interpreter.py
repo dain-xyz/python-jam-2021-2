@@ -56,14 +56,14 @@ def parse(program: str):
 
 
 actions = {
-    "move-up": Action.move_up,
-    "move-down": Action.move_down,
-    "move-left": Action.move_left,
-    "move-right": Action.move_right,
-    "grab-up": Action.grab_up,
-    "grab-down": Action.grab_down,
-    "grab-left": Action.grab_left,
-    "grab-right": Action.grab_right,
+    "move_up": Action.move_up,
+    "move_down": Action.move_down,
+    "move_left": Action.move_left,
+    "move_right": Action.move_right,
+    "grab_up": Action.grab_up,
+    "grab_down": Action.grab_down,
+    "grab_left": Action.grab_left,
+    "grab_right": Action.grab_right,
     "ungrab": Action.ungrab,
     "wait": Action.wait
 }
