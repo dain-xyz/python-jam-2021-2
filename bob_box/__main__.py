@@ -6,8 +6,33 @@ from game_movement import level_print
 from level_state import LevelState
 from interpreter import interpret, parse, InterpreterError, program_size
 from utils import Action, Point, P
+from level_data import(
+    level_1,
+    level_2,
+    level_3,
+    level_4,
+    level_5,
+    level_6,
+    level_7,
+    level_8,
+    level_9,
+    level_10
+)
 import time
 
+
+levels = {
+    1: level_1,
+    2: level_2,
+    3: level_3,
+    4: level_4,
+    5: level_5,
+    6: level_6,
+    7: level_7,
+    8: level_8,
+    9: level_9,
+    10: level_10
+}
 
 level_min_width = 20
 
@@ -22,7 +47,7 @@ def write_error(term, pos, message):
 
 
 def run_level(term, current_level):
-    level = LevelState.from_image(current_level)
+    level = LevelState(current_level)
     
     input_loc = P(max(level.size.x + 2, level_min_width), 0) 
     input_width = term.width - input_loc.x - 4
@@ -47,7 +72,7 @@ def run_level(term, current_level):
     write_stat(term, moves_pos, f"Moves: {moves}")
     
     while True:
-        level = LevelState.from_image(current_level) # reload level
+        level = LevelState(current_level) # reload level
         new_input_size = P(
             term.width - input_loc.x - 4, term.height - 4
         )
@@ -123,7 +148,7 @@ if __name__ == '__main__':
     with term.fullscreen(), term.hidden_cursor(), term.cbreak():
         while True:
             print(term.clear)
-            current_level = Path(f"levels/level{level_num}.png")
+            current_level = levels[level_num]
             results = run_level(term, current_level)
             level_num += 1
             # break

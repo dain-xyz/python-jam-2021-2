@@ -45,7 +45,7 @@ moves = {
 }
 
 if __name__ == "__main__":
-    level_path = Path("bob_box/levels/level1.png")
+    level_path = Path("level_images/level1.png")
     level = LevelState.from_image(level_path)
 
     term = blessed.Terminal()

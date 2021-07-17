@@ -61,6 +61,6 @@ def test_level(level):
 
 
 if __name__ == "__main__":
-    level_path = Path("levels/level1.png")
+    level_path = Path("level_images/level1.png")
     level = LevelState.from_image(level_path)
     test_level(level)
