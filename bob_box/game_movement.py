@@ -6,11 +6,6 @@ import time
 import blessed
 
 
-level_path = Path("levels/level1.png")
-level = LevelState.from_image(level_path)
-    
-
-
 def level_print(term, level) -> None:
     term.move_xy(0, 0)
     buffer = ""
@@ -50,6 +45,9 @@ moves = {
 }
 
 if __name__ == "__main__":
+    level_path = Path("bob_box/levels/level1.png")
+    level = LevelState.from_image(level_path)
+
     term = blessed.Terminal()
 
     with term.hidden_cursor(), term.cbreak():

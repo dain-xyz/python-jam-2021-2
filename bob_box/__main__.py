@@ -123,7 +123,7 @@ if __name__ == '__main__':
     with term.fullscreen(), term.hidden_cursor(), term.cbreak():
         while True:
             print(term.clear)
-            current_level = Path(f"levels/level{level_num}.png")
+            current_level = Path(f"bob_box/levels/level{level_num}.png")
             results = run_level(term, current_level)
             level_num += 1
             # break
