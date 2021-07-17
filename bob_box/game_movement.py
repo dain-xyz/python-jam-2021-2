@@ -18,13 +18,23 @@ def level_print(term, level) -> None:
         symbol = tile.top.symbol
         buffer += term.move_xy(x, y)
         if symbol == "O":# Player
-            buffer += term.black_on_yellow("O")
+            if level.player.is_dead:
+                buffer += term.black_on_red("O")
+            else:
+                buffer += term.black_on_yellow("O")
+        
         elif symbol == "X":
             buffer += term.black_on_red("X")
+        
         elif symbol == "\u25a0":
             buffer += term.blue_on_black("\u25a0")
+        
         elif symbol == "🮐":
             buffer += term.sienna4("▒")
+        
+        elif symbol == ".":
+            buffer += term.green(".")
+        
         else:
             buffer += " "
         

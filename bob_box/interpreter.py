@@ -29,6 +29,11 @@ def tokenise(chars: str) -> list:
     return chars.replace("\n", " ").replace('(', ' ( ').replace(')', ' ) ').split()
 
 
+def program_size(chars: str) -> int:
+    # number of non-paren tokens
+    return len([i for i in tokenise(chars) if i not in "()"])
+
+
 def read_from_tokens(tokens: list):
     """Read an expression from a sequence of tokens."""
     if len(tokens) == 0:
@@ -202,6 +207,9 @@ def interpret(parsed):
     
     except StopIteration as e:
         return e
+    
+    except Exception as e:
+        raise InterpreterError(f"Runtime error: {e}")
 
 
 if __name__ == "__main__":
@@ -213,7 +221,7 @@ if __name__ == "__main__":
         (set res
             (if (< 3 4)
                 (begin (set foo -1) (set bar -4))
-                grab-left))
+                grab_left))
         (set inc1 1)
         (set inc2 1)
         (repeat 5 (begin (set inc1 (+ inc1 1)) (set inc2 (- inc2 1))))
@@ -227,13 +235,13 @@ if __name__ == "__main__":
             (func
                 (begin
                     (set thing-before 5)
-                    move-up
+                    move_up
                 )
             )
         )
         (my-func)
         5
-        move-right
+        move_right
     )"""
 
     parsed = parse(test_code)
