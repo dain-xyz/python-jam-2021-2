@@ -12,14 +12,7 @@ from rich import print
 from PIL import Image
 
 from tiles import Tile, Player, Floor, Wall, Box, Enemy, Fire, Win
-from utils import Point, P, Action
-
-
-UP = P(0, -1)
-DOWN = P(0, 1)
-LEFT = P(-1, 0)
-RIGHT = P(1, 0)
-DIRECTIONS = {UP, DOWN, LEFT, RIGHT}
+from utils import Point, P, Action, UP, DOWN, LEFT, RIGHT
 
 
 moves = {

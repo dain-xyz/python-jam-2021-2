@@ -1,60 +1,65 @@
 # Entry point
 from blessed import Terminal
 from pathlib import Path
-from input_box import create_box
+from input_box import InputBox
 from game_movement import level_print
-from level_state import LevelState, UP, DOWN, LEFT, RIGHT, DIRECTIONS
-# from custom_parser import eval, parse
-from interpreter import interpret, parse
-from utils import Action
+from level_state import LevelState
+from interpreter import interpret, parse, InterpreterError
+from utils import Action, Point, P
 import time
 
 term = Terminal()
 
 current_level = Path("levels/level2.png")
-# level = LevelState.from_image(current_level)
-
-# functions = {
-#     "move": level.move_player,
-#     "==": lambda args: args[0]==args[1],
-#     "+": lambda args: args[0]+args[1],
-#     "grab": level.grab,
-#     "ungrab": level.ungrab,
-# }
-
-
-display_list = [""]
-cx = 0
-cy = 0
-
-mode = prev_mode = 0 # 0 is edit, 1 is run
 
 if __name__ == '__main__':
     with term.fullscreen(), term.hidden_cursor(), term.cbreak():
+        level = LevelState.from_image(current_level)
+
+        input_width = term.width - level.size.x - 4
+        input_height = term.height - 4
+        input_loc = P(level.size.x + 2, 0)
+        input_box = InputBox(term, P(input_width, input_height))
+        
+
         while True:
-            level = LevelState.from_image(current_level)
-            level_print(term, level)
+            # print(term.clear)
+            level = LevelState.from_image(current_level) # reload level
+            new_input_size = P(
+                term.width - level.size.x - 4, term.height - 4
+            )
+
+            with term.location(0, 0):
+                if input_box.window_size != new_input_size:
+                    # user resized the terminal, we need to refresh everything
+                    print(term.clear)
+                    input_box.window_size = new_input_size
+
+                level_print(term, level)
+                input_box.render(input_loc)
 
             key = term.inkey()
-            #print(term.home + term.clear)
-            #level_print(term, level)
+            if key.is_sequence and key.name == "KEY_F5":
+                print(term.clear_eol)
 
-            display_list, cx, cy, mode = create_box(level.size.x + 10, term, key, display_list, cx, cy)
+                try:
+                    parsed = parse(input_box.as_string)
+                    program = interpret(parsed)
+                    
+                    for action in program:
+                        if isinstance(action, Action):
+                            level.update(action)
+                            level_print(term, level)
+                            time.sleep(0.5)
 
-            if prev_mode != mode and mode == 1: # mode changed to run mode
-                parsed = parse("".join(display_list))
-                program = interpret(parsed)
-                
-                for action in program:
-                    if isinstance(action, Action):
-                        level.update(action)
-                        level_print(term, level)
-                        time.sleep(0.5)
+                    level_print(term, level)
 
-                mode = 0
-                level_print(term, level)
+                except InterpreterError as e:
+                    print(e)
             
-            prev_mode = mode
+            else:
+                input_box.handle_key(key)
+
                 
 
             

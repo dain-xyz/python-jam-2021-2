@@ -1,4 +1,5 @@
-from level_state import LevelState, UP, DOWN, LEFT, RIGHT, DIRECTIONS
+from level_state import LevelState
+from utils import UP, DOWN, LEFT, RIGHT
 from pathlib import Path
 import time
 
