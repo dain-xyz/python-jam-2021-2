@@ -1,159 +1,173 @@
-# Entry point
+import asyncio
+from run_levels import level_select
+
 from blessed import Terminal
-from pathlib import Path
-from input_box import InputBox
-from game_movement import level_print
-from level_state import LevelState
-from interpreter import interpret, parse, InterpreterError, program_size
-from utils import Action, Point, P
-from level_data import(
-    level_1,
-    level_2,
-    level_3,
-    level_4,
-    level_5,
-    level_6,
-    level_7,
-    level_8,
-    level_9,
-    level_10
-)
-import time
+
+term = Terminal()
+width = 0
+height = 0
+
+optimal_height = 45
+optimal_width = 80
+
+KEY_UP = 259
+KEY_DOWN = 258
+KEY_LEFT = 260
+KEY_RIGHT = 261
+KEY_ENTER = 343
 
 
-levels = {
-    1: level_1,
-    2: level_2,
-    3: level_3,
-    4: level_4,
-    5: level_5,
-    6: level_6,
-    7: level_7,
-    8: level_8,
-    9: level_9,
-    10: level_10
-}
-
-level_min_width = 20
+def test_callback() -> None:
+    """Tester callback function"""
+    print("HELLO FROM A CALLBACK")
 
 
-def write_stat(term, pos, message):
-    with term.location(0, 0):
-        print(term.move_xy(*pos) + message.ljust(level_min_width))
-
-def write_error(term, pos, message):
-    with term.location(0, 0):
-        print(term.move_xy(*pos) + message + term.clear_eol)
+def quit(*args, **kwargs) -> None:
+    """Callback to quit the program"""
+    loop.stop()
 
 
-def run_level(term, current_level):
-    level = LevelState(current_level)
-    
-    input_loc = P(max(level.size.x + 2, level_min_width), 0) 
-    input_width = term.width - input_loc.x - 4
-    input_height = term.height - 4
+options = [
+    {"text": "New Game", 'x': 0, 'y': 0, 'callback': level_select, 'selected': True},
+    # {"text": "Load Game", 'x': 0, 'y': 0, 'callback': None, 'selected': False},
+    {"text": "Exit", 'x': 0, 'y': 0, 'callback': quit, 'selected': False}
+]
 
-    input_box = InputBox(term, P(input_width, input_height))
 
-    attempts = 0
-    deaths = 0
-    prog_size = 0
-    moves = 0
+def set_text(term: object, line: int, column: int, text: str) -> None:
+    """Overwrite text on a given location"""
+    print(term.home + term.move(line, column) + text)
 
-    attempts_pos = P(0, level.size.y + 1) 
-    deaths_pos = P(0, level.size.y + 2) 
-    size_pos = P(0, level.size.y + 3) 
-    moves_pos = P(0, level.size.y + 4)
-    error_pos = P(0, term.height - 3)
 
-    write_stat(term, attempts_pos, f"Attempts: {attempts}")
-    write_stat(term, deaths_pos, f"Deaths: {deaths}")
-    write_stat(term, size_pos, f"Program size: {prog_size}")
-    write_stat(term, moves_pos, f"Moves: {moves}")
-    
+async def draw_menu(term: object, width: int = term.width, height: int = term.height, redraw: bool = False) -> None:
+    """Draw the menu, adjust to resize"""
     while True:
-        level = LevelState(current_level) # reload level
-        new_input_size = P(
-            term.width - input_loc.x - 4, term.height - 4
-        )
+        if width != term.width or height != term.height or redraw:
+            width = term.width
+            height = term.height
 
-        moves = 0
+            print(term.home + term.clear)
 
-        with term.location(0, 0):
-            if input_box.window_size != new_input_size:
-                # user resized the terminal, we need to refresh everything
-                print(term.clear)
-                input_box.window_size = new_input_size
+            horLine = "\u2550" * (width - 2)
+            horLineTop = term.on_black("\u2554" + horLine + "\u2557")
+            horLineBottom = term.on_black("\u255A" + horLine + "\u255D")
+            horLineSep = term.on_black("\u2560" + horLine + "\u2563")
+            vertLine = term.on_black("\u2551" + " " * (width - 2) + "\u2551")
 
-            level_print(term, level)
-            input_box.render(input_loc)
+            line = horLineTop + vertLine + horLineSep + vertLine * (height - 4) + horLineBottom
 
-        key = term.inkey()
-        if key.is_sequence and key.name == "KEY_F5":
-            print(term.clear_eol)
-            attempts += 1
-            write_stat(term, attempts_pos, f"Attempts: {attempts}")
+            print(term.home + term.clear + line + term.home)
 
-            try:
-                parsed = parse(input_box.as_string)
-                program = interpret(parsed)
-                
-                for action in program:
-                    if isinstance(action, Action):
-                        level.update(action)
-                        level_print(term, level)
-                        moves += 1
+            title = "Secretive Squirrels presents ..."
+            set_text(term, 1, width // 2 - len(title) // 2, term.on_black(title))
 
-                        write_stat(term, moves_pos, f"Moves: {moves}")
+            test = "  ____        _     ____            "
+            test2 = " |  _ \\      | |   |  _ \\           "
+            test3 = " | |_) | ___ | |__ | |_) | _____  __"
+            test4 = " |  _ < / _ \\| '_ \\|  _ < / _ \\ \\/ /"
+            test5 = " | |_) | (_) | |_) | |_) | (_) >  < "
+            test6 = " |____/ \\___/|_.__/|____/ \\___/_/\\_\\"
 
-                        time.sleep(0.5)
-                    
-                    if level.player.is_dead:
-                        deaths += 1
-                        write_stat(term, deaths_pos, f"Deaths: {deaths}")
+            set_text(term, 5, width // 2 - len(test) // 2, term.on_black(test))
+            set_text(term, 6, width // 2 - len(test2) // 2, term.on_black(test2))
+            set_text(term, 7, width // 2 - len(test3) // 2, term.on_black(test3))
+            set_text(term, 8, width // 2 - len(test4) // 2, term.on_black(test4))
+            set_text(term, 9, width // 2 - len(test5) // 2, term.on_black(test5))
+            set_text(term, 10, width // 2 - len(test6) // 2, term.on_black(test6))
+
+            # welcome = "Welcome to BobBox!"
+            # set_text(term, 5, width // 2 - len(welcome) // 2, term.on_black(welcome))
+            # set_text(term, 0,0, str(term.get_location()[0]))
+
+            if (height < optimal_height or width < optimal_width):
+                error_screen = "BobBox says: Screen too small!"
+                error_width = "Best width: " + str(optimal_width)
+                error_cur_width = "Current width: " + str(width)
+                error_height = "Best height: " + str(optimal_height)
+                error_cur_height = "Current height: " + str(height)
+
+                set_text(term, term.get_location()[0] + 1, width // 2 - len(error_screen) // 2,
+                         term.on_red(error_screen))
+
+                set_text(term, term.get_location()[0] + 1, width // 2 - len(error_width) // 2,
+                         term.on_red(error_width) if width < optimal_width else term.on_green(error_width))
+                set_text(term, term.get_location()[0], width // 2 - len(error_cur_width) // 2,
+                         term.on_red(error_cur_width) if width < optimal_width else term.on_green(error_cur_width))
+
+                set_text(term, term.get_location()[0] + 1, width // 2 - len(error_height) // 2,
+                         term.on_red(error_height) if height < optimal_height else term.on_green(error_height))
+                set_text(term, term.get_location()[0], width // 2 - len(error_cur_height) // 2,
+                         term.on_red(error_cur_height) if height < optimal_height else term.on_green(error_cur_height))
+
+            set_text(term, term.get_location()[0] + 3, 1, term.on_black(" "))
+            for i in range(len(options)):
+                options[i]['x'] = width // 2 - len(options[i]["text"]) // 2
+                options[i]['y'] = term.get_location()[0]
+                set_text(term, options[i]['y'], options[i]['x'], term.on_black(options[i]["text"]))
+
+                set_text(term, options[i]['y'], options[i]['x'] - 2,
+                         term.on_black("[" if options[i]['selected'] else " "))
+                set_text(term, options[i]['y'], options[i]['x'] + len(options[i]["text"]) + 1,
+                         term.on_black("]" if options[i]['selected'] else " "))
+        await asyncio.sleep(0.01)
+
+
+async def handle_inputs(term: object) -> None:
+    """Handles the inputs for the options"""
+    while True:
+        key = term.inkey(timeout=0.1)
+        if key.code == KEY_UP and not options[0]['selected']:
+            for index, item in enumerate(options):
+                if item['selected']:
+                    item['selected'] = False
+                    options[index - 1]['selected'] = True
+
+                    set_text(term, item['y'], item['x'] - 2, term.on_black(" "))
+                    set_text(term, item['y'], item['x'] + len(item["text"]) + 1, term.on_black(" "))
+                    set_text(term, options[index - 1]['y'], options[index - 1]['x'] - 2, term.on_black("["))
+                    set_text(term, options[index - 1]['y'],
+                             options[index - 1]['x'] + len(options[index - 1]["text"]) + 1,
+                             term.on_black("]"))
+                    break
+
+        if key.code == KEY_DOWN and not options[len(options) - 1]['selected']:
+            for index, item in enumerate(options):
+                if item['selected']:
+                    item['selected'] = False
+                    options[index + 1]['selected'] = True
+
+                    set_text(term, item['y'], item['x'] - 2, term.on_black(" "))
+                    set_text(term, item['y'], item['x'] + len(item["text"]) + 1, term.on_black(" "))
+                    set_text(term, options[index + 1]['y'], options[index + 1]['x'] - 2, term.on_black("["))
+                    set_text(term, options[index + 1]['y'],
+                             options[index + 1]['x'] + len(options[index + 1]["text"]) + 1,
+                             term.on_black("]"))
+                    break
+
+        if key.code == KEY_ENTER:
+            for index, item in enumerate(options):
+                if item['selected']:
+                    if item['callback'] is not None:
+                        item['callback'](term)
                         break
-                    
-                time.sleep(2)
-                level_print(term, level)
 
-            except InterpreterError as e:
-                write_error(term, error_pos, str(e))
-            
-            if level.won:
-                return {
-                    "won": True,
-                    "attempts": attempts,
-                    "deaths": deaths,
-                    "program_size": prog_size,
-                    "moves": moves
-                }
-        
-        else:
-            input_box.handle_key(key)
-            try:
-                prog_size = program_size(input_box.as_string)
-            except InterpreterError:
-                prog_size = "N/A"
-            
-            message = f"Program size: {prog_size}"
-            message = term.red(message) if prog_size == "N/A" else message
-
-            write_stat(term, size_pos, message)
+        await asyncio.sleep(0.01)
 
 
-if __name__ == '__main__':
-    term = Terminal()
-    level_num = 1
-
-    with term.fullscreen(), term.hidden_cursor(), term.cbreak():
-        while True:
-            print(term.clear)
-            current_level = levels[level_num]
-            results = run_level(term, current_level)
-            level_num += 1
-            # break
-    
-    # print(results)
+async def main() -> None:
+    """Main function -- WIP"""
+    pass
 
 
-        
+loop = asyncio.get_event_loop()
+try:
+    with term.fullscreen(), term.hidden_cursor(), term.cbreak(), term.keypad():
+        asyncio.ensure_future(main())
+        asyncio.ensure_future(draw_menu(term, width, height))
+        asyncio.ensure_future(handle_inputs(term))
+        loop.run_forever()
+
+except KeyboardInterrupt:
+    pass
+finally:
+    pass
