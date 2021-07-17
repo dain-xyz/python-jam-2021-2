@@ -213,7 +213,7 @@ class InputBox:
                         lookup[open_pos] = close_pos
                         lookup[close_pos] = open_pos
                     else:
-                        pass
+                        pass # unbalanced parens
         
         return lookup
 
