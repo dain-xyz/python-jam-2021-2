@@ -1,8 +1,21 @@
-# Bob Box
 
-##What is Bob Box?
-Bob Box is a box pusher game where you have to code a robot (bob) to get the boxes to the correct positions
+# BobBox: A game about moving boxes using code
 
+## Installation instructions
+
+Clone the repository, cd into it, optionally create and activate a virtual environment, then issue:
+
+```
+pip install -r requirements.txt
+```
+
+Still in the repo directory, launch the game with
+
+```
+python bob_box 
+```
+
+The game has been tested to work on the following terminals: Windows Terminal, XFCE4 Terminal, Kitty.
 
 ##The language
 The language is the main component of Bob Box, it's how you play after all!
@@ -102,4 +115,8 @@ The function "ungrabs" any box which is grabbed
 The simple operators list has `+ - * / // < <= > >= == `\
 They do what they do in python\
 Note that they are used as such: `(+ foo bar)`
+
+
+
+
 
