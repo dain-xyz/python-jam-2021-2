@@ -12,47 +12,41 @@ The language is based on scheme, it's pretty simple. Here's an example:
 
 ```
 (
+begin
+(move_up)
+(set x 5)
+(repeat x (
     begin
-    (func foo (
+    (if (== x 7) (
         begin
         (move_up)
-        (set x 5)
-        (repeat x (
-            begin
-            (if (== x 7) (
-                begin
-                (move_up)
-                )
-                (
-                (move_right)
-                )
-            (set x (+ x 1))
-            )
-        ))
-    ))
-    (foo)
+        )
+        (
+        (move_right)
+        )
+    (set x (+ x 1))
+    )
+))
 )
 ```
 Here's what this would do in python
 ```python
-def foo():
-    move_up()
-    x = 5
-    for i in range(x):
-        if x == 7:
-            move_up()
-        else:
-            move_right()
-        x = x + 1# This is what it actually does rather than x += 1
+move_up()
+x = 5
+for i in range(x):
+    if x == 7:
+        move_up()
+    else:
+        move_right()
+    x = x + 1# This is what it actually does rather than x += 1
 
-foo()
 ```
 
 Note that indentation is optional in our language
 
 ###Keywords
 There are few keywords in our language:\
-repeat, while, set, begin, if and func
+repeat, while, set, begin, and if
 
 ####repeat
 A loop\
@@ -81,10 +75,7 @@ An if statement\
 Args of codition, if true and if false
 Example: `(if (== x 5) (move_up) (move_down))`
 
-####func
-Defines a function\
-Args of function name and code in function\
-Example: `(func my_func (move_up))`\
+
 
 ###Built-in functions
 There are 3 built in functions for movement, however 2 have 4 variants of them\
