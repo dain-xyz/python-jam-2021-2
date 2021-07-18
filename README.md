@@ -1,4 +1,4 @@
-# BobBox: A game about moving boxes
+# BobBox: A game about moving boxes using code
 
 ## Installation instructions
 
