@@ -19,7 +19,7 @@ The game has been tested to work on the following terminals: Windows Terminal, C
 
 ## The language: BobScript
 
-The language is the main part of BobBox, it's how you play after all!
+The language is the main part of BobBox, it's how you play after all! The goal is to write a program which instructs Bob to move all of the boxes onto the colored victory tiles. You are scored based on the size of your program -- shorter, more elegant programs are better.
 
 ### Basic syntax
 
