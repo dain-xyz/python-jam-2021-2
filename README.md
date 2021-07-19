@@ -57,61 +57,61 @@ for i in range(x):
 
 Note that indentation is optional in our language
 
-###Keywords
+### Keywords
 There are very few keywords in our language:\
 repeat, while, set, begin, and if
 
-####repeat
+#### repeat
 A loop\
 Has args of number of times to repeat and code to execute\
 Example: `(repeat 5 (move_up))`
 
-####while
+#### while
 A while loop\
 Has args of condition and code to execute\
 Example: `(while (== x 5) (move_up))`
 
-####set
+#### set
 Variable setting
 Args of var name and value\
 Example: `(set x 5)`\
 Note: set can be used to initialise a variable
 
-####begin
+#### begin
 Starts a code-block\
 Args of statements to execute\
 Example: `(begin (move_up) (grab_right))`\
 Notes: When executing a single statement, begin is not needed, it simply says run all the following statements
 
-####if
+#### if
 An if statement\
 Args of codition, if true and if false
 Example: `(if (== x 5) (move_up) (move_down))`
 
 
 
-###Built-in functions
+### Built-in functions
 There are 3 built in functions for movement, however 2 have 4 variants of them\
 There are simple operators as the rest
 
-####move
+#### move
 The function "move" has 4 variants: 1 for all directions. These are `move_up move_down move_left move_right`\
 There are no args needed for this function\
 It does what it says, it moves bob
 
-####grab
+#### grab
 The function "grab" is like move; 4 variants, 1 for each direction. The variants are `grab_up grab_down grab_left grab_right`\
 There are no args needed\
 The function "grabs" a box in the direction which allows you to move with the box. If there is no box to grab, it does nothing\
 Note: grabbing a box while you already have one grabbed will cause you to ungrab the first box
 
 
-####ungrab
+#### ungrab
 The function "ungrab" only exists as `ungrab`\
 No args are needed\
 The function "ungrabs" any box which is grabbed
 
-###Simple operators
+### Simple operators
 The simple operators list has `+ - * / // < <= > >= == `\
 They do what they do in python\
 Note that they are used as such: `(+ foo bar)`
