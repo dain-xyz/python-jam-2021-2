@@ -50,7 +50,7 @@ for x in range(x):
     x = x + 1 # This is what it really does rather than x += 1
 ```
 
-Note that indentation is optional in our language.
+Note that indentation is **optional** in our language.
 
 ### Keywords
 
