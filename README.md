@@ -96,10 +96,10 @@ Notes: When executing a single expression, begin is not needed, it simply says r
 
 #### if
 
-An if statement. Has args of condition, if-true and if-false. Example:
+An if statement. Has args of condition and if-true. Example:
 
 ```
-(if (== x 5) move_up move_down)
+(if (== x 5) move_up)
 ```
 
 ### Actions
