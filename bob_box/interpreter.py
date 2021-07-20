@@ -94,7 +94,7 @@ basic_functions = {
     ">": operator.gt,
     ">=": operator.ge,
     "==": operator.eq,
-    "if": lambda cond, if_true, if_false: if_true if cond else if_false
+    # "if": lambda cond, if_true, if_false: if_true if cond else if_false
 }
 
 
@@ -139,6 +139,15 @@ def evaluate(code):
             res = yield from evaluate(body)
 
         return res
+    
+    elif func == "if":
+        cond, if_true, if_false = arguments
+        cond_value = yield from evaluate(cond)
+        
+        if cond_value:
+            return (yield from evaluate(if_true))
+        else:
+            return (yield from evaluate(if_false))
     
 
     # define a function (cannot take arguments yet)
